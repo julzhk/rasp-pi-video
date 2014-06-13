@@ -1,12 +1,10 @@
 # http://www.fileformat.info/format/mpeg/sample/index.dir
 import pygame
-
 FPS = 60
-
 pygame.init()
 clock = pygame.time.Clock()
 movie = pygame.movie.Movie('centaur_1.mpg')
-screen = pygame.display.set_mode(movie.get_size())
+screen = pygame.display.set_mode(movie.get_size()*2)
 movie_screen = pygame.Surface(movie.get_size()).convert()
 
 movie.set_display(movie_screen)
