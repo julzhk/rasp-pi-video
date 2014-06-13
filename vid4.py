@@ -1,11 +1,15 @@
 import pygame
 from time import sleep
 pygame.init()
-screen = pygame.display.set_mode((4*320,4*240))
+screen = pygame.display.set_mode((320,240))
 movie = pygame.movie.Movie("centaur_1.mpg")
 movie.play()
 while True:
     print(movie.get_frame())
+    if movie.get_frame() == 200:
+        movie.pause()
+        sleep(7)
+        movie.pause()
     if not(movie.get_busy()):
         print("rewind")
         movie.rewind()
