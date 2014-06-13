@@ -9,5 +9,6 @@ while True:
         print("rewind")
         movie.rewind()
         movie.play()
+        print(movie.get_frame())
     if pygame.QUIT in [e.type for e in pygame.event.get()]:
         break
