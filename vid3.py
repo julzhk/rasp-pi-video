@@ -51,7 +51,7 @@ def main(filepath):
     pygame.time.set_timer(USEREVENT, 0)
 
 if __name__ == '__main__':
-    main('centaur_1.mpg')
+    main('parkinsons.mpg')
     # if len(sys.argv) != 2:
     #     print (usage)
     # else:

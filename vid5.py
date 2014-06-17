@@ -3,7 +3,7 @@ import pygame
 FPS = 60
 pygame.init()
 clock = pygame.time.Clock()
-movie = pygame.movie.Movie('centaur_1.mpg')
+movie = pygame.movie.Movie('parkinsons.mpg')
 screen = pygame.display.set_mode(movie.get_size())
 movie_screen = pygame.Surface(movie.get_size()).convert()
 

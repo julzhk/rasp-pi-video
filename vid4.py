@@ -2,7 +2,7 @@ import pygame
 from time import sleep
 pygame.init()
 screen = pygame.display.set_mode((320,240))
-movie = pygame.movie.Movie("centaur_1.mpg")
+movie = pygame.movie.Movie("parkinsons.mpg")
 movie.play()
 already_paused = False
 while True:
