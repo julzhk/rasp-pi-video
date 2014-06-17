@@ -1,7 +1,8 @@
 import pygame
 from time import sleep
 pygame.init()
-screen = pygame.display.set_mode((320,240))
+# screen = pygame.display.set_mode((320,240))
+screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN)
 movie = pygame.movie.Movie("centaur_1.mpg")
 movie.play()
 while True:
