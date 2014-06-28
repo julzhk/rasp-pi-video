@@ -9,6 +9,6 @@ count = 0
 while True:
     inputValue = GPIO.input(24)
     if (inputValue == True):
-    count = count + 1
+        count = count + 1
     print("Button pressed " + str(count) + " times.")
     time.sleep(.01)
