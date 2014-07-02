@@ -23,7 +23,7 @@ ballsurface = pygame.Surface((50,50))     # create a rectangular surface for the
 #pygame.draw.circle(Surface, color, pos, radius, width=0) # from pygame.org documentation
 pygame.draw.circle(ballsurface, (0,0,255), (25,25),25) # draw blue filled circle on ball surface
 ballsurface = ballsurface.convert()              # faster blitting
-movie = pygame.movie.Movie('../parkinsons.mpg')
+movie = pygame.movie.Movie('parkinsons.mpg')
 movie_screen = pygame.Surface(movie.get_size()).convert()
 ballx = 320
 bally = 240
