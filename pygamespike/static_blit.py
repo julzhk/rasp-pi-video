@@ -23,6 +23,8 @@ ballsurface = pygame.Surface((50,50))     # create a rectangular surface for the
 #pygame.draw.circle(Surface, color, pos, radius, width=0) # from pygame.org documentation
 pygame.draw.circle(ballsurface, (0,0,255), (25,25),25) # draw blue filled circle on ball surface
 ballsurface = ballsurface.convert()              # faster blitting
+movie = pygame.movie.Movie('../parkinsons.mpg')
+movie_screen = pygame.Surface(movie.get_size()).convert()
 ballx = 320
 bally = 240
 #------- try out some pygame draw functions --------
@@ -48,6 +50,7 @@ while mainloop:
     mpos = mousepos()
     screen.fill((0,0,0))
     screen.blit(background,mpos)
+    screen.blit(movie_screen,mpos)
     milliseconds = clock.tick(FPS) # do not go faster than this frame rate
     playtime += milliseconds / 1000.0
     # ----- event handler -----
