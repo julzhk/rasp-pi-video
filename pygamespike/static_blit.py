@@ -62,4 +62,5 @@ while mainloop:
                 mainloop = False # user pressed ESC
     pygame.display.set_caption("Frame rate: %.2f frames per second. Playtime: %.2f seconds" % (clock.get_fps(),playtime))
     pygame.display.flip()          # flip the screen like in a flipbook
+    pygame.display.update()
 print( "this 'game' was played for %.2f seconds" % playtime)
