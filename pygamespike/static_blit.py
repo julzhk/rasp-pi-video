@@ -25,6 +25,7 @@ pygame.draw.circle(ballsurface, (0,0,255), (25,25),25) # draw blue filled circle
 ballsurface = ballsurface.convert()              # faster blitting
 movie = pygame.movie.Movie('parkinsons.mpg')
 movie_screen = pygame.Surface(movie.get_size()).convert()
+movie.play()
 ballx = 320
 bally = 240
 #------- try out some pygame draw functions --------
