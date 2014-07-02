@@ -26,20 +26,8 @@ ballsurface = ballsurface.convert()              # faster blitting
 movie = pygame.movie.Movie('parkinsons.mpg')
 movie_screen = pygame.Surface(movie.get_size()).convert()
 movie.play()
-ballx = 320
-bally = 240
-#------- try out some pygame draw functions --------
-# pygame.draw.rect(Surface, color, Rect, width=0): return Rect
-pygame.draw.rect(background, (0,255,0), (50,50,100,25)) # rect: (x1, y1, width, height)
-# pygame.draw.circle(Surface, color, pos, radius, width=0): return Rect
-pygame.draw.circle(background, (0,200,0), (200,50), 35)
-# pygame.draw.polygon(Surface, color, pointlist, width=0): return Rect
-pygame.draw.polygon(background, (0,180,0), ((250,100),(300,0),(350,50)))
-# pygame.draw.arc(Surface, color, Rect, start_angle, stop_angle, width=1): return Rect
-pygame.draw.arc(background, (0,150,0),(400,10,150,100), 0, 3.14) # radiant instead of grad
-#------- blit the surfaces on the screen to make them visible
 screen.blit(background, (0,0))     # blit the background on the screen (overwriting all)
-screen.blit(ballsurface, (ballx, bally))  # blit the topleft corner of ball surface at pos (ballx, bally)
+screen.blit(movie_screen, (0,0))  # blit the topleft corner of ball surface at pos (ballx, bally)
 clock = pygame.time.Clock()
 mainloop = True
 FPS = 30 # desired framerate in frames per second. try out other values !
