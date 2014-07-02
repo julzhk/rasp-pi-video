@@ -1,17 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""
-003_static_blit.py
-static blitting and drawing
-url: http://thepythongamebook.com/en:part2:pygame:step003
-author: horst.jens@spielend-programmieren.at
-licence: gpl, see http://www.gnu.org/licenses/gpl.html
-
-Blitting a surface on a static position Drawing a filled circle into ballsurface.
-Blitting this surface once. introducing pygame draw methods
-The ball's rectangular surface is black because the background
-color of the ball's surface was never defined nor filled."""
-#the next line is only needed for python2.x and not necessary for python3.x
 from __future__ import print_function, division
 import pygame
 pygame.init()
@@ -26,7 +14,7 @@ ballsurface = ballsurface.convert()              # faster blitting
 movie = pygame.movie.Movie('parkinsons.mpg')
 movie_screen = pygame.Surface(movie.get_size()).convert()
 movie.play()
-screen.blit(background, (0,0))     # blit the background on the screen (overwriting all)
+import time
 screen.blit(movie_screen, (0,0))  # blit the topleft corner of ball surface at pos (ballx, bally)
 clock = pygame.time.Clock()
 mainloop = True
@@ -50,6 +38,5 @@ while mainloop:
             if event.key == pygame.K_ESCAPE:
                 mainloop = False # user pressed ESC
     pygame.display.set_caption("Frame rate: %.2f frames per second. Playtime: %.2f seconds" % (clock.get_fps(),playtime))
-    pygame.display.flip()          # flip the screen like in a flipbook
     pygame.display.update()
 print( "this 'game' was played for %.2f seconds" % playtime)
