@@ -1,8 +1,33 @@
 import time
+import pifacedigitalio
+
+pfd = pifacedigitalio.PiFaceDigital()
+import pygame
 
 HIDE_MOUSE = True
-import pygame
+RESETPIN = 0
+GLOVETESTPIN = 1
+OFFPIN = 2
+STARTPIN = 3
 FPS = 60
+
+
+def reset():
+    pass
+
+
+def glovetest():
+    pass
+
+
+def off():
+    pass
+
+
+def start():
+    pass
+
+
 pygame.init()
 clock = pygame.time.Clock()
 movie = pygame.movie.Movie('parkinsons.mpg')
@@ -20,5 +45,18 @@ while True:
     pygame.display.update()
     clock.tick(FPS)
     frame = movie.get_frame()
+    for i in range(0, 8):
+        print i, ' ', pfd.input_pins[i].value,
+    print
+    if pfd.input_pins[RESETPIN].value:
+        reset()
+    if pfd.input_pins[GLOVETESTPIN].value:
+        glovetest()
+    if pfd.input_pins[OFFPIN].value:
+        off()
+    if pfd.input_pins[STARTPIN].value:
+        start()
+
+
 
 
