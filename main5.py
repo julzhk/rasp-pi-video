@@ -10,22 +10,23 @@ GLOVETESTPIN = 1
 OFFPIN = 2
 STARTPIN = 3
 FPS = 60
-
-
+DEBUG = True
 def reset():
     pass
-
-
 def glovetest():
     pass
-
-
 def off():
-    pass
+    exit()
 
 
 def start():
     pass
+
+
+def debug():
+    for i in range(0, 8):
+        print i, ' ', pfd.input_pins[i].value,
+    print
 
 
 pygame.init()
@@ -45,9 +46,8 @@ while True:
     pygame.display.update()
     clock.tick(FPS)
     frame = movie.get_frame()
-    for i in range(0, 8):
-        print i, ' ', pfd.input_pins[i].value,
-    print
+    if DEBUG:
+        debug()
     if pfd.input_pins[RESETPIN].value:
         reset()
     if pfd.input_pins[GLOVETESTPIN].value:
