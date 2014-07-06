@@ -11,24 +11,33 @@ OFFPIN = 2
 STARTPIN = 3
 FPS = 60
 DEBUG = True
+
+
+def activate_glove():
+    pass
+    pfd.output_pin(GLOVETESTPIN).value = 1
+
+
 def reset():
     pass
+    pfd.output_pin(RESETPIN).value = 1
+
+
 def glovetest():
-    pass
+    activate_glove()
+    pfd.output_pin(GLOVETESTPIN).value = 1
+
+
 def off():
+    pfd.output_pin(OFFPIN).value = 1
     exit()
-
-
 def start():
     pass
-
-
+    pfd.output_pin(STARTPIN).value = 1
 def debug():
     for i in range(0, 8):
         print i, ' ', pfd.input_pins[i].value,
     print
-
-
 pygame.init()
 clock = pygame.time.Clock()
 movie = pygame.movie.Movie('parkinsons.mpg')
