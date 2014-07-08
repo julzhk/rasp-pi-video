@@ -19,7 +19,7 @@ def led_on(pin):
     pfd.leds[pin].turn_on()
 def activate_glove():
         led_on(GLOVETESTPIN)
-        timer_control(funktion=led_off,args=GLOVETESTPIN).start()
+        timer_control(funktion=led_off,args=[GLOVETESTPIN]).start()
 
 def glovetest():
     activate_glove()
@@ -29,13 +29,16 @@ def off():
 def start():
     movie.play()
     led_on(STARTPIN)
-    timer_control(funktion=led_off,args=STARTPIN).start()
+    timer_control(funktion=led_off,args=[STARTPIN]).start()
 
 def reset():
+    global movie,screen
     led_on(RESETPIN)
-    timer_control(funktion=led_off,args=RESETPIN).start()
+    timer_control(funktion=led_off,args=[RESETPIN]).start()
     movie.rewind()
-    start()
+    blit_screen()
+    screen.fill((0,0,0))
+    movie.pause()
 
 def debug():
     for i in range(0, 8):
@@ -46,13 +49,17 @@ def debug():
 def turn_off_leds():
     [pfd.leds[i].turn_off() for i in range(0, 4)]
 
+def blit_screen():
+    global screen,movie_screen
+    time.sleep(.01)
+    screen.blit(movie_screen, (0, 0))
+    pygame.display.update()
+
 
 def start_project():
     while True:
         try:
-            time.sleep(.01)
-            screen.blit(movie_screen, (0, 0))
-            pygame.display.update()
+            blit_screen()
             clock.tick(FPS)
             print DEBUG & movie.get_frame()
             if DEBUG:
