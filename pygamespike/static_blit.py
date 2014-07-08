@@ -18,7 +18,7 @@ import time
 screen.blit(movie_screen, (0,0))  # blit the topleft corner of ball surface at pos (ballx, bally)
 clock = pygame.time.Clock()
 mainloop = True
-FPS = 30 # desired framerate in frames per second. try out other values !
+FPS = 10 # desired framerate in frames per second. try out other values !
 playtime = 0.0
 def mousepos():
     r= pygame.mouse.get_pos()
@@ -37,6 +37,9 @@ while mainloop:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 mainloop = False # user pressed ESC
-    pygame.display.set_caption("Frame rate: %.2f frames per second. Playtime: %.2f seconds" % (clock.get_fps(),playtime))
-    pygame.display.update()
+    try:
+        pygame.display.set_caption("Frame rate: %.2f frames per second. Playtime: %.2f seconds" % (clock.get_fps(),playtime))
+        pygame.display.update()
+    except:
+        print( 'oopsy'),
 print( "this 'game' was played for %.2f seconds" % playtime)

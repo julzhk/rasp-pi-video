@@ -9,7 +9,7 @@ class timer_control(threading.Thread):
             self.funktion(*self.args)
         exit()
 
-    def __init__(self,funktion=None, args = args, sleeptime=4):
+    def __init__(self,funktion=None, args = None, sleeptime=4):
         self.funktion = funktion
         self.args = args
         self.sleeptime = sleeptime
