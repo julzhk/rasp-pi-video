@@ -12,14 +12,18 @@ OFFPIN = 2
 STARTPIN = 3
 FPS = 60
 DEBUG = True
+MOVIE_FILE='parkinsons.mpg'
 
 def led_off(pin):
     pfd.leds[pin].turn_off()
 def led_on(pin):
     pfd.leds[pin].turn_on()
+
 def activate_glove():
-        led_on(GLOVETESTPIN)
-        timer_control(funktion=led_off,args=[GLOVETESTPIN]).start()
+    led_on(GLOVETESTPIN)
+    timer_control(funktion=led_off,args=[GLOVETESTPIN]).start()
+    pfd.relays[0].turn_on()        
+    pfd.relays[1].turn_on()        
 
 def glovetest():
     activate_glove()
@@ -27,6 +31,7 @@ def off():
     raise
 
 def start():
+    global movie
     movie.play()
     led_on(STARTPIN)
     timer_control(funktion=led_off,args=[STARTPIN]).start()
@@ -80,7 +85,7 @@ pygame.init()
 clock = pygame.time.Clock()
 pygame.display.init()
 movie_screen = pygame.Surface((600,500))
-movie = pygame.movie.Movie('parkinsons.mpg')
+movie = pygame.movie.Movie(MOVIE_FILE)
 movie.set_display(movie_screen)
 pygame.mouse.set_visible(not HIDE_MOUSE)
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
