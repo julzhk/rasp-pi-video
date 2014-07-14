@@ -118,7 +118,8 @@ def mainmovie():
                 off()
             if pfd.input_pins[STARTPIN].value:
                 start()
-        except:
+        except Exception as err:
+            print err
             turn_off_leds()
             raise do_replaceheadphones
 
