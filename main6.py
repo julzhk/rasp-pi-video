@@ -102,6 +102,9 @@ def instructions():
 
 def mainmovie():
     print 'movie'
+    global movie, screen, movie_screen
+    start()
+
     clock = pygame.time.Clock()
     while True:
         try:
