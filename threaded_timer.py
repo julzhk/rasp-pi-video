@@ -4,7 +4,7 @@ import threading
 class timer_control(threading.Thread):
     def run(self):
         threading._sleep(self.sleeptime)
-        print "Do this once after %s seconds, then quit", self.sleeptime
+        print "Do this once after {0:s} seconds, then quit".format(self.sleeptime)
         if self.funktion:
             self.funktion(*self.args)
         exit()
