@@ -22,11 +22,8 @@ MOVIE_FILE = 'parkinsons.mpg'
 
 def led_off(pin):
     pfd.leds[pin].turn_off()
-
-
 def led_on(pin):
     pfd.leds[pin].turn_on()
-
 
 def activate_glove():
     led_on(GLOVETESTPIN)
@@ -34,14 +31,11 @@ def activate_glove():
     pfd.relays[0].turn_on()
     pfd.relays[1].turn_on()
 
-
 def glovetest():
     activate_glove()
 
-
 def off():
     raise
-
 
 def start():
     global movie
@@ -59,7 +53,6 @@ def reset():
     screen.fill((0, 0, 0))
     movie.pause()
 
-
 def debug():
     for i in range(0, 8):
         print i, ' ', pfd.input_pins[i].value,
@@ -68,7 +61,6 @@ def debug():
 
 def turn_off_leds():
     [pfd.leds[i].turn_off() for i in range(0, 4)]
-
 
 def blit_screen():
     global screen, movie_screen
@@ -80,22 +72,17 @@ def blit_screen():
 class PhaseChange(Exception):
     pass
 
-
 class do_screensaver(PhaseChange):
     pass
-
 
 class do_instructions(PhaseChange):
     pass
 
-
 class do_mainmovie(PhaseChange):
     pass
 
-
 class do_replaceheadphones(PhaseChange):
     pass
-
 
 class do_quit(PhaseChange):
     pass
@@ -104,17 +91,18 @@ class do_quit(PhaseChange):
 def screensaver():
     print 'screensaver'
     sleep(1)
-    raise
+    raise do_instructions
 
 
 def instructions():
     print 'instructions'
     sleep(3)
-    raise
+    raise do_mainmovie
 
 
 def mainmovie():
     print 'movie'
+    clock = pygame.time.Clock()
     while True:
         try:
             blit_screen()
@@ -132,21 +120,19 @@ def mainmovie():
                 start()
         except:
             turn_off_leds()
-            exit()
+            raise do_replaceheadphones
 
 
 def replaceheadphones():
     print 'reset'
-    raise
+    raise do_screensaver
 
 
 def quit():
     exit()
 
-
 def main():
     pygame.init()
-    clock = pygame.time.Clock()
     pygame.display.init()
     movie_screen = pygame.Surface((600, 500))
     movie = pygame.movie.Movie(MOVIE_FILE)
