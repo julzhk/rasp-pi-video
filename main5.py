@@ -81,18 +81,20 @@ def start_project():
             turn_off_leds()
             exit()
 
-pygame.init()
-clock = pygame.time.Clock()
-pygame.display.init()
-movie_screen = pygame.Surface((600,500))
-movie = pygame.movie.Movie(MOVIE_FILE)
-movie.set_display(movie_screen)
-pygame.mouse.set_visible(not HIDE_MOUSE)
-screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-print screen
-print movie.get_size()
 
-start_project()
+if __name__ == "__main__":
+    pygame.init()
+    clock = pygame.time.Clock()
+    pygame.display.init()
+    movie_screen = pygame.Surface((600, 500))
+    movie = pygame.movie.Movie(MOVIE_FILE)
+    movie.set_display(movie_screen)
+    pygame.mouse.set_visible(not HIDE_MOUSE)
+    screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+    print screen
+    print movie.get_size()
+
+    start_project()
 
 
 
