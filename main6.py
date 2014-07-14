@@ -125,7 +125,7 @@ def mainmovie():
 
 def replaceheadphones():
     print 'reset'
-    raise do_screensaver
+    raise do_quit
 
 
 def quit():
