@@ -38,14 +38,14 @@ def off():
     raise
 
 def start():
-    global movie, screen
+    global movie, screen, movie_screen
     movie.play()
     led_on(STARTPIN)
     timer_control(funktion=led_off, args=[STARTPIN]).start()
 
 
 def reset():
-    global movie, screen
+    global movie, screen, movie_screen
     led_on(RESETPIN)
     timer_control(funktion=led_off, args=[RESETPIN]).start()
     movie.rewind()
@@ -63,7 +63,7 @@ def turn_off_leds():
     [pfd.leds[i].turn_off() for i in range(0, 4)]
 
 def blit_screen():
-    global screen, movie_screen
+    global screen, movie_screen, movie
     time.sleep(.01)
     screen.blit(movie_screen, (0, 0))
     pygame.display.update()
@@ -133,7 +133,7 @@ def quit():
     exit()
 
 def main():
-    global movie, screen
+    global movie, screen, movie_screen
     pygame.init()
     pygame.display.init()
     movie_screen = pygame.Surface((200, 200))
