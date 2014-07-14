@@ -96,15 +96,23 @@ def screensaver():
 
 def instructions():
     print 'instructions'
-    sleep(3)
+    sleep(1)
     raise do_mainmovie
 
 
 def mainmovie():
     print 'movie'
-    global movie, screen, movie_screen
-    start()
 
+    pygame.init()
+    clock = pygame.time.Clock()
+    pygame.display.init()
+    movie_screen = pygame.Surface((600, 500))
+    movie = pygame.movie.Movie(MOVIE_FILE)
+    movie.set_display(movie_screen)
+    pygame.mouse.set_visible(not HIDE_MOUSE)
+    screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+    print screen
+    print movie.get_size()
     clock = pygame.time.Clock()
     while True:
         try:
