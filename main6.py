@@ -38,7 +38,7 @@ def off():
     raise
 
 def start():
-    global movie
+    global movie, screen
     movie.play()
     led_on(STARTPIN)
     timer_control(funktion=led_off, args=[STARTPIN]).start()
@@ -133,6 +133,7 @@ def quit():
     exit()
 
 def main():
+    global movie, screen
     pygame.init()
     pygame.display.init()
     movie_screen = pygame.Surface((200, 200))
