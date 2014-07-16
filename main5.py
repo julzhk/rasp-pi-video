@@ -1,6 +1,6 @@
 import time
 import pygame
-
+import logging_decorator
 try:
     import pifacedigitalio
     pfd = pifacedigitalio.PiFaceDigital()
@@ -48,12 +48,12 @@ def off():
     # quit with an exception
     raise
 
-def start():
+def play_main_movie():
     global movie
     movie.play()
     led_on(STARTPIN)
 
-def reset():
+def reset_main_movie():
     global movie,screen
     led_on(RESETPIN)
     movie.rewind()
@@ -76,7 +76,20 @@ def blit_screen():
     pygame.display.update()
 
 
+def screensaver():
+    """
+        Waiting for a user. Waiting for the headphones to be lifted
+    """
+    print 'screensaver start'
+    time.sleep(2)
+    print 'screensaver stop'
+    return
+
 def start_project():
+    screensaver()
+    start_mainmovie()
+
+def start_mainmovie():
     while True:
         try:
             blit_screen()
@@ -85,16 +98,17 @@ def start_project():
             if DEBUG:
                 debug()
             if pfd.input_pins[RESETPIN].value:
-                reset()
+                reset_main_movie()
             if pfd.input_pins[GLOVETESTPIN].value:
                 glovetest()
             if pfd.input_pins[OFFPIN].value:
-                off()
+                print 'ok, quit main movie'
+                return
             if pfd.input_pins[STARTPIN].value:
-                start()
+                play_main_movie()
         except:
             turn_off_all_leds()
-            exit()
+            return
 
 
 if __name__ == "__main__":
