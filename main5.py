@@ -41,6 +41,7 @@ def led_on(pin):
 def activate_glove():
     # turn on LED & turn on both Relays
     led_on(GLOVETESTPIN)
+    pfd.relays[0].turn_on()
     pfd.relays[1].turn_on()
 
 def glovetest():
