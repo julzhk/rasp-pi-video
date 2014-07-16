@@ -1,5 +1,6 @@
 import time
 import pygame
+import logging_data
 import logging_decorator
 import logging
 try:
@@ -40,16 +41,12 @@ def led_on(pin):
 def activate_glove():
     # turn on LED & turn on both Relays
     led_on(GLOVETESTPIN)
-    pfd.relays[0].turn_on()
-    pfd.relays[1].turn_on()        
+    pfd.relays[1].turn_on()
 
 def glovetest():
     # called by button on pin GLOVETESTPIN
     activate_glove()
 
-def off():
-    # quit with an exception
-    raise
 
 def play_main_movie():
     global movie
@@ -110,7 +107,7 @@ def start_mainmovie():
                 play_main_movie()
         except Exception as err:
             turn_off_all_leds()
-            raise 
+            raise
 
 
 if __name__ == "__main__":
