@@ -9,7 +9,7 @@ except ImportError:
     pfd_installed = False
 
 import threading
-from threaded_timer import timer_control
+from threaded_timer import TimerControl
 
 HIDE_MOUSE = True
 RESETPIN = 0
@@ -32,7 +32,7 @@ def led_on(pin):
     # Wrappers for turn on/off LED by number
     pfd.leds[pin].turn_on()
     # auto off LED in a few seconds
-    timer_control(funktion=led_off,args=[pin]).start()
+    TimerControl(funktion=led_off,args=[pin]).start()
 
 def activate_glove():
     # turn on LED & turn on both Relays

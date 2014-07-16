@@ -6,7 +6,7 @@ import pifacedigitalio
 
 import pygame
 
-from threaded_timer import timer_control
+from threaded_timer import TimerControl
 
 pfd = pifacedigitalio.PiFaceDigital()
 
@@ -27,7 +27,7 @@ def led_on(pin):
 
 def activate_glove():
     led_on(GLOVETESTPIN)
-    timer_control(funktion=led_off, args=[GLOVETESTPIN]).start()
+    TimerControl(funktion=led_off, args=[GLOVETESTPIN]).start()
     pfd.relays[0].turn_on()
     pfd.relays[1].turn_on()
 
@@ -41,13 +41,13 @@ def start():
     global movie, screen, movie_screen
     movie.play()
     led_on(STARTPIN)
-    timer_control(funktion=led_off, args=[STARTPIN]).start()
+    TimerControl(funktion=led_off, args=[STARTPIN]).start()
 
 
 def reset():
     global movie, screen, movie_screen
     led_on(RESETPIN)
-    timer_control(funktion=led_off, args=[RESETPIN]).start()
+    TimerControl(funktion=led_off, args=[RESETPIN]).start()
     movie.rewind()
     blit_screen()
     screen.fill((0, 0, 0))
