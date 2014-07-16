@@ -68,11 +68,11 @@ def debug():
         print
 
 
-
 def blit_screen():
-    global screen,movie_screen
+    global screen,movie_screen,movie
     time.sleep(.01)
     screen.blit(movie_screen, (0, 0))
+    print 'frame: %s ' % movie.get_frame()
     pygame.display.update()
 
 
@@ -94,7 +94,6 @@ def start_mainmovie():
         try:
             blit_screen()
             clock.tick(FPS)
-            print DEBUG & movie.get_frame()
             if DEBUG:
                 debug()
             if pfd.input_pins[RESETPIN].value:
