@@ -63,7 +63,7 @@ def reset_main_movie():
 
 def debug():
     if pfd_installed:
-        logging.debug(','.join(['%s:%s' % (i, pfd.input_pins[i].value) for i in xrange(0,9)]))
+        logging.debug(','.join(['%s:%s' % (i, pfd.input_pins[i].value) for i in xrange(0,8)]))
 
 
 def blit_screen():
