@@ -8,7 +8,6 @@ try:
 except ImportError:
     pfd_installed = False
 
-import threading
 from threaded_timer import TimerControl
 
 HIDE_MOUSE = True
@@ -20,6 +19,9 @@ FULLSCREEN = False
 FPS = 60
 DEBUG = True
 MOVIE_FILE='parkinsons.mpg'
+
+class QuitException(Exception):
+    pass
 
 def led_off(pin):
     # Wrappers for turn on/off LED by number
@@ -81,13 +83,15 @@ def screensaver():
         Waiting for a user. Waiting for the headphones to be lifted
     """
     print 'screensaver start'
-    time.sleep(2)
-    print 'screensaver stop'
+    print 'wait for headphones to be lifted'
+    time.sleep(1)
+    print 'screensaver stop: headphones lifted'
     return
 
-def start_project():
-    screensaver()
-    start_mainmovie()
+def replace_headphones():
+    print 'waiting for headphones to be reset'
+    time.sleep(1)
+    print 'headphones reset'
 
 def start_mainmovie():
     while True:
@@ -102,12 +106,12 @@ def start_mainmovie():
                 glovetest()
             if pfd.input_pins[OFFPIN].value:
                 print 'ok, quit main movie'
-                return
+                raise QuitException
             if pfd.input_pins[STARTPIN].value:
                 play_main_movie()
-        except:
+        except Exception as err:
             turn_off_all_leds()
-            return
+            raise err
 
 
 if __name__ == "__main__":
@@ -125,4 +129,7 @@ if __name__ == "__main__":
     print screen
     print movie.get_size()
 
-    start_project()
+    while True:
+        screensaver()
+        start_mainmovie()
+        replace_headphones()
