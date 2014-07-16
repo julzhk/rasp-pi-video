@@ -1,58 +1,73 @@
 import time
-import pifacedigitalio
+import pygame
+
+try:
+    import pifacedigitalio
+    pfd = pifacedigitalio.PiFaceDigital()
+    pfd_installed = True
+except ImportError:
+    pfd_installed = False
+
 import threading
 from threaded_timer import timer_control
-pfd = pifacedigitalio.PiFaceDigital()
-import pygame
 
 HIDE_MOUSE = True
 RESETPIN = 0
 GLOVETESTPIN = 1
 OFFPIN = 2
 STARTPIN = 3
+
 FPS = 60
 DEBUG = True
 MOVIE_FILE='parkinsons.mpg'
 
 def led_off(pin):
+    # Wrappers for turn on/off LED by number
     pfd.leds[pin].turn_off()
+
+def turn_off_all_leds():
+    [pfd.leds[i].turn_off() for i in range(0, 4)]
+
 def led_on(pin):
+    # Wrappers for turn on/off LED by number
     pfd.leds[pin].turn_on()
+    # auto off LED in a few seconds
+    timer_control(funktion=led_off,args=[pin]).start()
 
 def activate_glove():
+    # turn on LED & turn on both Relays
     led_on(GLOVETESTPIN)
-    timer_control(funktion=led_off,args=[GLOVETESTPIN]).start()
-    pfd.relays[0].turn_on()        
+    pfd.relays[0].turn_on()
     pfd.relays[1].turn_on()        
 
 def glovetest():
+    # called by button on pin GLOVETESTPIN
     activate_glove()
+
 def off():
+    # quit with an exception
     raise
 
 def start():
     global movie
     movie.play()
     led_on(STARTPIN)
-    timer_control(funktion=led_off,args=[STARTPIN]).start()
 
 def reset():
     global movie,screen
     led_on(RESETPIN)
-    timer_control(funktion=led_off,args=[RESETPIN]).start()
     movie.rewind()
     blit_screen()
     screen.fill((0,0,0))
     movie.pause()
 
 def debug():
-    for i in range(0, 8):
-        print i, ' ', pfd.input_pins[i].value,
-    print
+    if pfd_installed:
+        for i in range(0, 8):
+            print i, ' ', pfd.input_pins[i].value,
+        print
 
 
-def turn_off_leds():
-    [pfd.leds[i].turn_off() for i in range(0, 4)]
 
 def blit_screen():
     global screen,movie_screen
@@ -78,7 +93,7 @@ def start_project():
             if pfd.input_pins[STARTPIN].value:
                 start()
         except:
-            turn_off_leds()
+            turn_off_all_leds()
             exit()
 
 
@@ -95,7 +110,3 @@ if __name__ == "__main__":
     print movie.get_size()
 
     start_project()
-
-
-
-
