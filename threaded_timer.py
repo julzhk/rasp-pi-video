@@ -10,7 +10,10 @@ class TimerControl(threading.Thread):
             RUN is a magic name in the Threading Library
         """
         threading._sleep(self.sleeptime)
-        logging.INFO("Do this once after %s seconds, then run %s" % (self.sleeptime, self.funktion.__name__))
+        try:
+            logging.INFO("Timer wait: %s seconds, then %s" % (self.sleeptime, self.funktion.__name__))
+        except TypeError:
+            logging.INFO("Do this once after %s seconds, then?? %s" % (self.sleeptime, self.funktion))
         if self.funktion:
             self.funktion(*self.args)
         exit()
