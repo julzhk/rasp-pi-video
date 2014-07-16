@@ -19,5 +19,5 @@ class log_with(object):
             self.logger.info(self.ENTRY_MESSAGE.format(func.__name__))
             f_results = func(*args,**kwargs)
             self.logger.info(self.EXIT_MESSAGE.format(func.__name__))
-            return f_result
+            return f_results
         return wrapper
