@@ -16,7 +16,7 @@ RESETPIN = 0
 GLOVETESTPIN = 1
 OFFPIN = 2
 STARTPIN = 3
-
+FULLSCREEN = False
 FPS = 60
 DEBUG = True
 MOVIE_FILE='parkinsons.mpg'
@@ -105,7 +105,10 @@ if __name__ == "__main__":
     movie = pygame.movie.Movie(MOVIE_FILE)
     movie.set_display(movie_screen)
     pygame.mouse.set_visible(not HIDE_MOUSE)
-    screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+    if FULLSCREEN:
+        screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+    else:
+        screen = pygame.display.set_mode((250,500), pygame.RESIZABLE)
     print screen
     print movie.get_size()
 
