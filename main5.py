@@ -29,8 +29,10 @@ def led_off(pin):
     # Wrappers for turn on/off LED by number
     pfd.leds[pin].turn_off()
 
-def turn_off_all_leds():
+def turn_off_all_outputs():
     [pfd.leds[i].turn_off() for i in range(0, 4)]
+    pfd.relays[0].turn_off()
+    pfd.relays[1].turn_off()
 
 def led_on(pin):
     # Wrappers for turn on/off LED by number
@@ -107,7 +109,6 @@ def start_mainmovie():
             if pfd.input_pins[STARTPIN].value:
                 play_main_movie()
         except Exception as err:
-            turn_off_all_leds()
             raise
 
 
@@ -132,3 +133,4 @@ if __name__ == "__main__":
             replace_headphones()
     except QuitException:
         print 'bye!'
+        turn_off_all_outputs()
