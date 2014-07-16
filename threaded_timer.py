@@ -1,5 +1,6 @@
 import threading
 import logging
+SLEEPTIME=3
 
 class TimerControl(threading.Thread):
     """
@@ -10,18 +11,13 @@ class TimerControl(threading.Thread):
             RUN is a magic name in the Threading Library
         """
         threading._sleep(self.sleeptime)
-        try:
-            logging.INFO("Timer wait: %s seconds, then %s" % (self.sleeptime, self.funktion.__name__))
-        except TypeError:
-            logging.INFO("Do this once after %s seconds, then?? %s" % (self.sleeptime, self.funktion))
-        if self.funktion:
-            self.funktion(*self.args)
+        self.funktion( *self.args)
         exit()
 
-    def __init__(self, funktion=None, args=None, sleeptime=3):
+    def __init__(self, funktion=None, args=None):
         self.funktion = funktion
         self.args = args
-        self.sleeptime = sleeptime
+        self.sleeptime = SLEEPTIME
         threading.Thread.__init__(self)
 
 
