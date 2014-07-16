@@ -110,7 +110,7 @@ def start_mainmovie():
                 play_main_movie()
         except Exception as err:
             turn_off_all_leds()
-            raise err
+            raise 
 
 
 if __name__ == "__main__":
