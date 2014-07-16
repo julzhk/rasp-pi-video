@@ -1,6 +1,7 @@
 import time
 import pygame
 import logging_decorator
+import logging
 try:
     import pifacedigitalio
     pfd = pifacedigitalio.PiFaceDigital()
@@ -65,16 +66,14 @@ def reset_main_movie():
 
 def debug():
     if pfd_installed:
-        for i in range(0, 8):
-            print i, ' ', pfd.input_pins[i].value,
-        print
+        logging.debug(','.join([str(i,pfd.input_pins[i].value) for i in xrange(0,9)]))
 
 
 def blit_screen():
     global screen,movie_screen,movie
     time.sleep(.01)
     screen.blit(movie_screen, (0, 0))
-    print 'frame: %s ' % movie.get_frame()
+    logging.debug('frame: %s ' % movie.get_frame())
     pygame.display.update()
 
 
@@ -128,8 +127,10 @@ if __name__ == "__main__":
         screen = pygame.display.set_mode((250,500), pygame.RESIZABLE)
     print screen
     print movie.get_size()
-
-    while True:
-        screensaver()
-        start_mainmovie()
-        replace_headphones()
+    try:
+        while True:
+            screensaver()
+            start_mainmovie()
+            replace_headphones()
+    except QuitException:
+        print 'bye!'
