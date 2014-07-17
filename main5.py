@@ -18,6 +18,7 @@ GLOVETESTPIN = 1
 OFFPIN = 2
 STARTPIN = 3
 HEADPHONEMAGNETPIN = 4
+USE_HEADPHONE_SENSOR = True
 FULLSCREEN = False
 FPS = 60
 DEBUG = True
@@ -50,6 +51,9 @@ def activate_glove():
 def glovetest():
     # called by button on pin GLOVETESTPIN
     activate_glove()
+    time.sleep(4)
+    pfd.relays[0].turn_off()
+    pfd.relays[1].turn_off()
 
 
 def play_main_movie():
@@ -77,6 +81,16 @@ def blit_screen():
     logging.debug('frame: %s ' % movie.get_frame())
     pygame.display.update()
 
+def headphones_on_stand():
+    headphone_status =  not pfd.input_pins[HEADPHONEMAGNETPIN].value
+    if DEBUG:
+        logging.debug('headphone stand status: %s' % headphone_status)
+    return headphone_status
+
+
+def start_button_pressed():
+    return pfd.input_pins[STARTPIN].value
+
 
 def screensaver():
     """
@@ -85,18 +99,30 @@ def screensaver():
     print 'screensaver start'
     print 'wait for headphones to be lifted'
     while True:
-        if pfd.input_pins[STARTPIN].value or pfd.input_pins[HEADPHONEMAGNETPIN].value:
-            print 'headphones lifted'
-            return
+        if USE_HEADPHONE_SENSOR:
+            if start_button_pressed() or not headphones_on_stand():
+                print 'headphones lifted'
+                time.sleep(1)
+                return
+        else:
+            if start_button_pressed():
+                print 'start button'
+                time.sleep(1)
+                return
 
 def replace_headphones():
     print 'waiting for headphones to be reset'
     while True:
-        if pfd.input_pins[STARTPIN].value or not pfd.input_pins[HEADPHONEMAGNETPIN].value:
-            print 'headphones reset'
+        if USE_HEADPHONE_SENSOR:
+            if start_button_pressed() or headphones_on_stand():
+                print 'headphones reset'
+                time.sleep(2)
+                return
+        else:
+            time.sleep(3)
+            print 'reset & start again'
             return
 
-    print 'headphones reset'
 
 def start_mainmovie():
     while True:
@@ -107,14 +133,14 @@ def start_mainmovie():
                 debug()
             if pfd.input_pins[RESETPIN].value:
                 reset_main_movie()
-            if not pfd.input_pins[HEADPHONEMAGNETPIN].value:
+            if headphones_on_stand():
                 return
             if pfd.input_pins[GLOVETESTPIN].value:
                 glovetest()
             if pfd.input_pins[OFFPIN].value:
                 print 'ok, quit main movie'
                 raise QuitException
-            if pfd.input_pins[STARTPIN].value:
+            if start_button_pressed():
                 play_main_movie()
         except Exception as err:
             raise
@@ -122,18 +148,18 @@ def start_mainmovie():
 
 if __name__ == "__main__":
     pygame.init()
-    clock = pygame.time.Clock()
     pygame.display.init()
+    pygame.mouse.set_visible(not HIDE_MOUSE)
     movie_screen = pygame.Surface((800, 480))
     movie = pygame.movie.Movie(MOVIE_FILE)
     movie.set_display(movie_screen)
-    pygame.mouse.set_visible(not HIDE_MOUSE)
+    clock = pygame.time.Clock()
     if FULLSCREEN:
         screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
     else:
         screen = pygame.display.set_mode((400,240), pygame.RESIZABLE)
-    print screen
-    print movie.get_size()
+    print 'screen : %s' % str(screen)
+    print 'movie size: %s' % str(movie.get_size())
     try:
         while True:
             screensaver()
