@@ -107,6 +107,8 @@ def start_mainmovie():
                 debug()
             if pfd.input_pins[RESETPIN].value:
                 reset_main_movie()
+            if not pfd.input_pins[HEADPHONEMAGNETPIN].value:
+                return
             if pfd.input_pins[GLOVETESTPIN].value:
                 glovetest()
             if pfd.input_pins[OFFPIN].value:
@@ -122,14 +124,14 @@ if __name__ == "__main__":
     pygame.init()
     clock = pygame.time.Clock()
     pygame.display.init()
-    movie_screen = pygame.Surface((600, 500))
+    movie_screen = pygame.Surface((800, 480))
     movie = pygame.movie.Movie(MOVIE_FILE)
     movie.set_display(movie_screen)
     pygame.mouse.set_visible(not HIDE_MOUSE)
     if FULLSCREEN:
         screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
     else:
-        screen = pygame.display.set_mode((250,500), pygame.RESIZABLE)
+        screen = pygame.display.set_mode((400,240), pygame.RESIZABLE)
     print screen
     print movie.get_size()
     try:
