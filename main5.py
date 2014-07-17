@@ -3,6 +3,7 @@ import pygame
 from pygame.locals import QUIT, KEYDOWN, MOUSEBUTTONDOWN
 import logging_data
 import logging_decorator
+import random
 import logging
 try:
     import pifacedigitalio
@@ -25,7 +26,7 @@ FULLSCREEN = False
 FPS = 60
 DEBUG = True
 MOVIE_FILE='take3d.mpg'
-
+SCREENSAVER_MESSAGE =
 class QuitException(Exception):
     pass
 
@@ -74,7 +75,11 @@ def reset_main_movie():
 
 def debug():
     if pfd_installed:
-        logging.debug(','.join(['%s:%s' % (i, pfd.input_pins[i].value) for i in xrange(0,8)]))
+        logging.debug(
+            ','.join(['%s:%s' %
+                     (i, pfd.input_pins[i].value) for i in xrange(0,8)]
+            )
+        )
 
 
 def check_keyboard_quit():
@@ -100,6 +105,24 @@ def start_button_pressed():
     return pfd.input_pins[STARTPIN].value
 
 
+def write_text(msg='Open Box',randomly=False):
+    wincolor = 40, 40, 90
+    fg = 250, 240, 230
+    bg = 5, 5, 5
+    # fill background
+    font = pygame.font.Font(None, 40)
+    size = font.size(msg)
+    ren = font.render(msg, 1, fg)
+    screen.fill(wincolor)
+    x,y = 0
+    if randomly:
+        x,y = random.randint(0,300),random.randint(0,200)
+    screen.blit(ren, (30 + size[0] + x,
+                      40 + size[1] + y)
+                )
+    pygame.display.update()
+
+
 def screensaver():
     """
         Waiting for a user. Waiting for the headphones to be lifted
@@ -107,24 +130,14 @@ def screensaver():
     print 'screensaver start'
     print 'wait for headphones to be lifted'
     global USE_HEADPHONE_SENSOR
-    wincolor = 40, 40, 90
-    fg = 250, 240, 230
-    bg = 5, 5, 5
-    #fill background
-    screen.fill(wincolor)
-    font = pygame.font.Font(None, 40)
-    text = 'Open box'
-    size = font.size(text)
-    ren = font.render(text, 1, fg)
-    screen.blit(ren, (30 + size[0], 40 + size[1]))
-    pygame.display.update()
+    write_text(msg=SCREENSAVER_MESSAGE,randomly = True)
+
     while True:
         if DEBUG:
             logging.debug('screensaver phase')
         if USE_HEADPHONE_SENSOR:
-            if start_button_pressed() or not headphones_on_stand():
+            if not headphones_on_stand():
                 print 'headphones lifted'
-                USE_HEADPHONE_SENSOR = False
                 time.sleep(1)
                 return
         else:
