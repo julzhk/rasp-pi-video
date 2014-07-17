@@ -17,10 +17,11 @@ RESETPIN = 0
 GLOVETESTPIN = 1
 OFFPIN = 2
 STARTPIN = 3
+HEADPHONEMAGNETPIN = 4
 FULLSCREEN = False
 FPS = 60
 DEBUG = True
-MOVIE_FILE='parkinsons.mpg'
+MOVIE_FILE='Take3d.mpg'
 
 class QuitException(Exception):
     pass
@@ -71,7 +72,7 @@ def debug():
 
 def blit_screen():
     global screen,movie_screen,movie
-    time.sleep(.01)
+    time.sleep(.001)
     screen.blit(movie_screen, (0, 0))
     logging.debug('frame: %s ' % movie.get_frame())
     pygame.display.update()
@@ -83,13 +84,18 @@ def screensaver():
     """
     print 'screensaver start'
     print 'wait for headphones to be lifted'
-    time.sleep(1)
-    print 'screensaver stop: headphones lifted'
-    return
+    while True:
+        if pfd.input_pins[STARTPIN].value or not pfd.input_pins[HEADPHONEMAGNETPIN].value:
+            print 'headphones lifted'
+            return
 
 def replace_headphones():
     print 'waiting for headphones to be reset'
-    time.sleep(1)
+    while True:
+        if pfd.input_pins[STARTPIN].value or pfd.input_pins[HEADPHONEMAGNETPIN].value:
+            print 'headphones reset'
+            return
+
     print 'headphones reset'
 
 def start_mainmovie():
