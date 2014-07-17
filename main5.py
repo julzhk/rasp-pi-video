@@ -26,7 +26,7 @@ FULLSCREEN = False
 FPS = 60
 DEBUG = True
 MOVIE_FILE='take3d.mpg'
-SCREENSAVER_MESSAGE = 'Open Box and put on headphones'
+SCREENSAVER_MESSAGE = 'Open box'
 class QuitException(Exception):
     pass
 
@@ -110,7 +110,7 @@ def write_text(msg='Open Box'):
     fg = 250, 240, 230
     bg = 5, 5, 5
     # fill background
-    font = pygame.font.Font(None, 40)
+    font = pygame.font.Font(None, 30)
     size = font.size(msg)
     ren = font.render(msg, 1, fg)
     screen.fill(wincolor)
@@ -141,6 +141,8 @@ def screensaver():
                 return
 
 def replace_headphones():
+    write_text(msg='Return Headphones')
+
     print 'waiting for headphones to be reset'
     write_text(msg='Thank you')
     while True:
