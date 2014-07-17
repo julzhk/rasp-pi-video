@@ -109,13 +109,12 @@ def screensaver():
     bg = 5, 5, 5
     #fill background
     screen.fill(wincolor)
-    font = pygame.font.Font(None, 80)
-    text = 'Listen for instructions'
+    font = pygame.font.Font(None, 40)
+    text = 'Open box'
     size = font.size(text)
-
-    #no AA, no transparancy, normal
-    ren = font.render(text, 0, fg, bg)
-    screen.blit(ren, (10, 10))
+    ren = font.render(text, 1, fg)
+    screen.blit(ren, (30 + size[0], 40 + size[1]))
+    pygame.display.update()
     while True:
         check_keyboard_quit()
         if DEBUG:
