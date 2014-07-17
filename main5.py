@@ -78,7 +78,7 @@ def debug():
 
 def check_keyboard_quit():
     if QUIT_WITH_KEYBOARD and (pygame.event.wait().type in (QUIT, KEYDOWN, MOUSEBUTTONDOWN)):
-        break
+        raise 
 
 def blit_screen():
     global screen,movie_screen,movie
@@ -105,6 +105,8 @@ def screensaver():
     print 'screensaver start'
     print 'wait for headphones to be lifted'
     wincolor = 40, 40, 90
+    fg = 250, 240, 230
+    bg = 5, 5, 5
     #fill background
     screen.fill(wincolor)
     font = pygame.font.Font(None, 80)
@@ -177,6 +179,7 @@ if __name__ == "__main__":
     pygame.mouse.set_visible(not HIDE_MOUSE)
     movie_screen = pygame.Surface((800, 480))
     movie = pygame.movie.Movie(MOVIE_FILE)
+    pygame.event.set_allowed((QUIT, KEYDOWN))
     movie.set_display(movie_screen)
     movie.set_volume(0.99)
     clock = pygame.time.Clock()
