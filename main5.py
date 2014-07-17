@@ -78,7 +78,7 @@ def debug():
 
 def check_keyboard_quit():
     if QUIT_WITH_KEYBOARD and (pygame.event.wait().type in (QUIT, KEYDOWN, MOUSEBUTTONDOWN)):
-        raise 
+        raise QuitException
 
 def blit_screen():
     global screen,movie_screen,movie
