@@ -19,7 +19,7 @@ GLOVETESTPIN = 1
 OFFPIN = 2
 STARTPIN = 3
 HEADPHONEMAGNETPIN = 4
-USE_HEADPHONE_SENSOR = False
+USE_HEADPHONE_SENSOR = True
 QUIT_WITH_KEYBOARD = True
 FULLSCREEN = False
 FPS = 60
@@ -70,6 +70,7 @@ def reset_main_movie():
     blit_screen()
     screen.fill((0,0,0))
     time.sleep(0.5)
+    play_main_movie()
 
 def debug():
     if pfd_installed:
@@ -105,6 +106,7 @@ def screensaver():
     """
     print 'screensaver start'
     print 'wait for headphones to be lifted'
+    global USE_HEADPHONE_SENSOR
     wincolor = 40, 40, 90
     fg = 250, 240, 230
     bg = 5, 5, 5
@@ -122,6 +124,7 @@ def screensaver():
         if USE_HEADPHONE_SENSOR:
             if start_button_pressed() or not headphones_on_stand():
                 print 'headphones lifted'
+                USE_HEADPHONE_SENSOR = False
                 time.sleep(1)
                 return
         else:
