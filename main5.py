@@ -95,7 +95,7 @@ def blit_screen():
     pygame.display.update()
 
 def headphones_on_stand():
-    headphone_status =   pfd.input_pins[HEADPHONEMAGNETPIN].value
+    headphone_status = pfd.input_pins[HEADPHONEMAGNETPIN].value
     if DEBUG:
         logging.debug('headphone is on stand status: %s' % headphone_status)
     return headphone_status
@@ -105,7 +105,7 @@ def start_button_pressed():
     return pfd.input_pins[STARTPIN].value
 
 
-def write_text(msg='Open Box',randomly=False):
+def write_text(msg='Open Box'):
     wincolor = 40, 40, 90
     fg = 250, 240, 230
     bg = 5, 5, 5
@@ -114,11 +114,8 @@ def write_text(msg='Open Box',randomly=False):
     size = font.size(msg)
     ren = font.render(msg, 1, fg)
     screen.fill(wincolor)
-    x,y = 0
-    if randomly:
-        x,y = random.randint(0,300),random.randint(0,200)
-    screen.blit(ren, (30 + size[0] + x,
-                      40 + size[1] + y)
+    screen.blit(ren, (30 + size[0],
+                      40 + size[1])
                 )
     pygame.display.update()
 
@@ -130,8 +127,7 @@ def screensaver():
     print 'screensaver start'
     print 'wait for headphones to be lifted'
     global USE_HEADPHONE_SENSOR
-    write_text(msg=SCREENSAVER_MESSAGE,randomly = True)
-
+    write_text(msg=SCREENSAVER_MESSAGE)
     while True:
         if DEBUG:
             logging.debug('screensaver phase')
