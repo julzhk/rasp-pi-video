@@ -187,6 +187,7 @@ def start_mainmovie():
 
 if __name__ == "__main__":
     pygame.init()
+    pygame.mixer.quit()
     pygame.display.init()
     pygame.mouse.set_visible(not HIDE_MOUSE)
     movie_screen = pygame.Surface((800, 480))
