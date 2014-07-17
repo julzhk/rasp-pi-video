@@ -1,5 +1,6 @@
 import time
 import pygame
+from pygame.locals import QUIT, KEYDOWN, MOUSEBUTTONDOWN
 import logging_data
 import logging_decorator
 import logging
@@ -19,6 +20,7 @@ OFFPIN = 2
 STARTPIN = 3
 HEADPHONEMAGNETPIN = 4
 USE_HEADPHONE_SENSOR = True
+QUIT_WITH_KEYBOARD = True
 FULLSCREEN = False
 FPS = 60
 DEBUG = True
@@ -74,6 +76,10 @@ def debug():
         logging.debug(','.join(['%s:%s' % (i, pfd.input_pins[i].value) for i in xrange(0,8)]))
 
 
+def check_keyboard_quit():
+    if QUIT_WITH_KEYBOARD and (pygame.event.wait().type in (QUIT, KEYDOWN, MOUSEBUTTONDOWN)):
+        break
+
 def blit_screen():
     global screen,movie_screen,movie
     time.sleep(.001)
@@ -98,7 +104,20 @@ def screensaver():
     """
     print 'screensaver start'
     print 'wait for headphones to be lifted'
+    wincolor = 40, 40, 90
+    #fill background
+    screen.fill(wincolor)
+    font = pygame.font.Font(None, 80)
+    text = 'Listen for instructions'
+    size = font.size(text)
+
+    #no AA, no transparancy, normal
+    ren = font.render(text, 0, fg, bg)
+    screen.blit(ren, (10, 10))
     while True:
+        check_keyboard_quit()
+        if DEBUG:
+            logging.debug('screensaver phase')
         if USE_HEADPHONE_SENSOR:
             if start_button_pressed() or not headphones_on_stand():
                 print 'headphones lifted'
@@ -113,6 +132,9 @@ def screensaver():
 def replace_headphones():
     print 'waiting for headphones to be reset'
     while True:
+        check_keyboard_quit()
+        if DEBUG:
+            logging.debug('waiting for headphones to be reset phase')
         if USE_HEADPHONE_SENSOR:
             if start_button_pressed() or headphones_on_stand():
                 print 'headphones reset'
@@ -127,6 +149,9 @@ def replace_headphones():
 def start_mainmovie():
     while True:
         try:
+            check_keyboard_quit()
+            if DEBUG:
+                logging.debug('---play---')
             blit_screen()
             clock.tick(FPS)
             if DEBUG:
@@ -153,6 +178,7 @@ if __name__ == "__main__":
     movie_screen = pygame.Surface((800, 480))
     movie = pygame.movie.Movie(MOVIE_FILE)
     movie.set_display(movie_screen)
+    movie.set_volume(0.99)
     clock = pygame.time.Clock()
     if FULLSCREEN:
         screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
