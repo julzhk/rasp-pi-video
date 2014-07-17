@@ -19,12 +19,12 @@ GLOVETESTPIN = 1
 OFFPIN = 2
 STARTPIN = 3
 HEADPHONEMAGNETPIN = 4
-USE_HEADPHONE_SENSOR = True
+USE_HEADPHONE_SENSOR = False
 QUIT_WITH_KEYBOARD = True
 FULLSCREEN = False
 FPS = 60
 DEBUG = True
-MOVIE_FILE='Take3d.mpg'
+MOVIE_FILE='take3d.mpg'
 
 class QuitException(Exception):
     pass
@@ -69,7 +69,7 @@ def reset_main_movie():
     movie.rewind()
     blit_screen()
     screen.fill((0,0,0))
-    movie.pause()
+    time.sleep(0.5)
 
 def debug():
     if pfd_installed:
@@ -77,8 +77,9 @@ def debug():
 
 
 def check_keyboard_quit():
-    if QUIT_WITH_KEYBOARD and (pygame.event.wait().type in (QUIT, KEYDOWN, MOUSEBUTTONDOWN)):
-        raise QuitException
+    if QUIT_WITH_KEYBOARD:
+        if pygame.event.wait().type in (QUIT, KEYDOWN, MOUSEBUTTONDOWN):
+            raise QuitException
 
 def blit_screen():
     global screen,movie_screen,movie
@@ -88,9 +89,9 @@ def blit_screen():
     pygame.display.update()
 
 def headphones_on_stand():
-    headphone_status =  not pfd.input_pins[HEADPHONEMAGNETPIN].value
+    headphone_status =   pfd.input_pins[HEADPHONEMAGNETPIN].value
     if DEBUG:
-        logging.debug('headphone stand status: %s' % headphone_status)
+        logging.debug('headphone is on stand status: %s' % headphone_status)
     return headphone_status
 
 
@@ -116,7 +117,6 @@ def screensaver():
     screen.blit(ren, (30 + size[0], 40 + size[1]))
     pygame.display.update()
     while True:
-        check_keyboard_quit()
         if DEBUG:
             logging.debug('screensaver phase')
         if USE_HEADPHONE_SENSOR:
@@ -133,7 +133,6 @@ def screensaver():
 def replace_headphones():
     print 'waiting for headphones to be reset'
     while True:
-        check_keyboard_quit()
         if DEBUG:
             logging.debug('waiting for headphones to be reset phase')
         if USE_HEADPHONE_SENSOR:
@@ -143,14 +142,15 @@ def replace_headphones():
                 return
         else:
             time.sleep(3)
-            print 'reset & start again'
+            print 'auto reset & start again'
             return
 
 
 def start_mainmovie():
+    if not USE_HEADPHONE_SENSOR:
+        play_main_movie()
     while True:
         try:
-            check_keyboard_quit()
             if DEBUG:
                 logging.debug('---play---')
             blit_screen()
@@ -159,7 +159,7 @@ def start_mainmovie():
                 debug()
             if pfd.input_pins[RESETPIN].value:
                 reset_main_movie()
-            if headphones_on_stand():
+            if USE_HEADPHONE_SENSOR and headphones_on_stand():
                 return
             if pfd.input_pins[GLOVETESTPIN].value:
                 glovetest()
