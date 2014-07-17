@@ -26,7 +26,7 @@ FULLSCREEN = False
 FPS = 60
 DEBUG = True
 MOVIE_FILE='take3d.mpg'
-SCREENSAVER_MESSAGE =
+SCREENSAVER_MESSAGE = 'Open Box and put on headphones'
 class QuitException(Exception):
     pass
 
