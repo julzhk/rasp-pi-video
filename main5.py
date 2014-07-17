@@ -85,14 +85,14 @@ def screensaver():
     print 'screensaver start'
     print 'wait for headphones to be lifted'
     while True:
-        if pfd.input_pins[STARTPIN].value or not pfd.input_pins[HEADPHONEMAGNETPIN].value:
+        if pfd.input_pins[STARTPIN].value or pfd.input_pins[HEADPHONEMAGNETPIN].value:
             print 'headphones lifted'
             return
 
 def replace_headphones():
     print 'waiting for headphones to be reset'
     while True:
-        if pfd.input_pins[STARTPIN].value or pfd.input_pins[HEADPHONEMAGNETPIN].value:
+        if pfd.input_pins[STARTPIN].value or not pfd.input_pins[HEADPHONEMAGNETPIN].value:
             print 'headphones reset'
             return
 
