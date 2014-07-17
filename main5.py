@@ -114,9 +114,7 @@ def write_text(msg='Open Box'):
     size = font.size(msg)
     ren = font.render(msg, 1, fg)
     screen.fill(wincolor)
-    screen.blit(ren, (30 + size[0],
-                      40 + size[1])
-                )
+    screen.blit(ren, (30 + size[0],40 + size[1]))
     pygame.display.update()
 
 
@@ -144,6 +142,7 @@ def screensaver():
 
 def replace_headphones():
     print 'waiting for headphones to be reset'
+    write_text(msg='Thank you')
     while True:
         if DEBUG:
             logging.debug('waiting for headphones to be reset phase')
@@ -170,7 +169,7 @@ def start_mainmovie():
             if DEBUG:
                 debug()
             if pfd.input_pins[RESETPIN].value:
-                reset_main_movie()
+                return
             if USE_HEADPHONE_SENSOR and headphones_on_stand():
                 return
             if pfd.input_pins[GLOVETESTPIN].value:
