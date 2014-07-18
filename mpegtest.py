@@ -1,10 +1,16 @@
-global movie
 import pygame
-pygame.init()
-movie = pygame.movie.Movie("take3e.mpg")
-if movie.has_video():
-    screen = pygame.display.set_mode(movie.get_size())
-    movie_length = movie.get_length()
+MOVIE_FILE = 'testb.mpg'
+if __name__ == "__main__":
+    pygame.init()
+    pygame.mixer.quit()
+    pygame.display.init()
+    movie_screen = pygame.Surface((800, 600))
+    movie = pygame.movie.Movie(MOVIE_FILE)
+    movie.set_display(movie_screen)
     movie.set_volume(0.99)
-    movie.set_display(screen)
+    clock = pygame.time.Clock()
+    screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+    print 'screen : %s' % str(screen)
+    print 'movie size: %s' % str(movie.get_size())
+    movie.rewind()
     movie.play()
