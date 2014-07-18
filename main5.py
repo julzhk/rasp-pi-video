@@ -22,11 +22,12 @@ STARTPIN = 3
 HEADPHONEMAGNETPIN = 4
 USE_HEADPHONE_SENSOR = True
 QUIT_WITH_KEYBOARD = True
-FULLSCREEN = False
-FPS = 60
-DEBUG = True
+FULLSCREEN = True
+FPS = 30
+DEBUG = False
 MOVIE_FILE='take3d.mpg'
 SCREENSAVER_MESSAGE = 'Open box'
+BUTTON_MESSAGE='Press start'
 class QuitException(Exception):
     pass
 
@@ -89,9 +90,9 @@ def check_keyboard_quit():
 
 def blit_screen():
     global screen,movie_screen,movie
-    time.sleep(.001)
     screen.blit(movie_screen, (0, 0))
-    logging.debug('frame: %s ' % movie.get_frame())
+    if DEBUG:
+        logging.debug('frame: %s ' % movie.get_frame())
     pygame.display.update()
 
 def headphones_on_stand():
@@ -106,7 +107,7 @@ def start_button_pressed():
 
 
 def write_text(msg='Open Box'):
-    wincolor = 40, 40, 90
+    wincolor = 0, 0, 0
     fg = 250, 240, 230
     bg = 5, 5, 5
     # fill background
@@ -162,6 +163,14 @@ def replace_headphones():
 def start_mainmovie():
     if not USE_HEADPHONE_SENSOR:
         play_main_movie()
+    else:
+        write_text(msg=BUTTON_MESSAGE)
+        start_pause = True
+        while start_pause:
+            if start_button_pressed():
+                play_main_movie()
+                start_pause = False
+
     while True:
         try:
             if DEBUG:
@@ -190,9 +199,8 @@ if __name__ == "__main__":
     pygame.mixer.quit()
     pygame.display.init()
     pygame.mouse.set_visible(not HIDE_MOUSE)
-    movie_screen = pygame.Surface((800, 480))
+    movie_screen = pygame.Surface((1600, 800))
     movie = pygame.movie.Movie(MOVIE_FILE)
-    pygame.event.set_allowed((QUIT, KEYDOWN))
     movie.set_display(movie_screen)
     movie.set_volume(0.99)
     clock = pygame.time.Clock()
@@ -204,6 +212,7 @@ if __name__ == "__main__":
     print 'movie size: %s' % str(movie.get_size())
     try:
         while True:
+            movie.rewind()
             screensaver()
             start_mainmovie()
             replace_headphones()
