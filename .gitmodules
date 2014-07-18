@@ -1,0 +1,3 @@
+[submodule "pyoplayer"]
+	path = pyoplayer
+	url = https://github.com/jbaiter/pyomxplayer.git
