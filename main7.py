@@ -14,13 +14,13 @@ try:
 except ImportError:
     pfd_installed = False
 
-from threaded_timer import TimerControl
 # how many seconds after the start of the movie should the glove start?
 GLOVE_COMMENCE_TIME = 10
 # how many seconds after the start of the movie should the glove stop?
 GLOVE_QUIT_TIME = 30
 
-HIDE_MOUSE = True
+from threaded_timer import TimerControl
+
 RESETPIN = 0
 GLOVETESTPIN = 1
 OFFPIN = 2
@@ -30,8 +30,8 @@ USE_HEADPHONE_SENSOR = True
 QUIT_WITH_KEYBOARD = True
 FULLSCREEN = True
 DEBUG = False
-# MOVIE_FILE='take3d.mpg'
-MOVIE_FILE = 'testc.mov'
+MOVIE_FILE = 'take3d.mpg'
+# short clip! MOVIE_FILE = 'testc.mov'
 SCREENSAVER_MESSAGE = 'Put on the headphones to start'
 BUTTON_MESSAGE = "Listen to the instructions, & press 'start' when ready"
 #  how many omx video threads are running at the moment?
@@ -106,17 +106,12 @@ def cleanup_main_movie_player():
     omx_pids = pexpect.spawn('pgrep omxplayer')
     time.sleep(2)
     pslist = omx_pids.read()
-    # print pslist
     for pid in pslist.split():
-        # print pid
         pidkill = 'sudo kill -9 %s' % pid
-        # print pidkill
         omx_pids = pexpect.spawn('sudo kill -9 %s' % pid)
-        # print omx_pids.read()
-        # print '-'* 8
 
 
-def debug():
+def debug_gpio():
     if pfd_installed:
         logging.debug(
             ','.join(['%s:%s' %
@@ -126,6 +121,7 @@ def debug():
 
 
 def check_keyboard_quit():
+    #todo no implemented
     if QUIT_WITH_KEYBOARD:
         if pygame.event.wait().type in (QUIT, KEYDOWN, MOUSEBUTTONDOWN):
             raise QuitException
@@ -142,13 +138,14 @@ def start_button_pressed():
     return pfd.input_pins[STARTPIN].value
 
 
-def write_text(msg='Open Box'):
-    wincolor = 0, 0, 0
-    fg = 250, 240, 230
-    # fill background
+def write_text(msg='Demo message', wincolor=None, font_colour=None):
+    if wincolor is None:
+        wincolor = 0, 0, 0
+    if font_colour is None:
+        font_colour = 250, 240, 230
     font = pygame.font.Font(None, 30)
     size = font.size(msg)
-    ren = font.render(msg, 1, fg)
+    ren = font.render(msg, 1, font_colour)
     screen.fill(wincolor)
     screen.blit(ren, (30 + size[0], 40 + size[1]))
     pygame.display.update()
@@ -202,6 +199,10 @@ def replace_headphones():
 
 
 def glove_handler():
+    """
+    starts and stops the glove at certain time stamps; using threads.
+
+    """
     glove_start_thread = Timer(GLOVE_COMMENCE_TIME, activate_glove)
     glove_start_thread.start()  # after NN seconds, glove trembles
     glove_stop_thread = Timer(GLOVE_QUIT_TIME, quit_glove)
@@ -217,6 +218,9 @@ def quit_button_check():
 
 
 def stop_omx_player_watcher_thread():
+    """
+    This global variable is passed into the thread; if false the next thread doesn't start
+    """
     global _videocountthread_running
     _videocountthread_running = False
 
@@ -239,9 +243,7 @@ def start_mainmovie():
             if DEBUG:
                 logging.debug('---play---')
                 logging.debug('videos: %s' % _OMXPLAYER_COUNT)
-            if DEBUG:
-                debug()
-            print _OMXPLAYER_COUNT
+                debug_gpio()
             if _OMXPLAYER_COUNT >= 1:
                 # it's got to start before the 'has ended' condition can apply
                 omxplayer_started = True
@@ -260,7 +262,7 @@ def start_mainmovie():
                 glovetest()
             if start_button_pressed():
                 pass
-                # todo should exit and restart?
+                # todo should exit / restart?
         except PhaseEndException:
             cleanup_main_movie_player()
             glovestartthread.cancel()
