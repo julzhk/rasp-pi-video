@@ -6,6 +6,8 @@ from pygame.locals import QUIT, KEYDOWN, MOUSEBUTTONDOWN
 import threading
 from threading import Timer
 import logging
+from pygame import Surface
+from text_block import TextWall, TextLine
 
 try:
     import pifacedigitalio
@@ -143,11 +145,11 @@ def write_text(msg='Demo message', wincolor=None, font_colour=None):
         wincolor = 0, 0, 0
     if font_colour is None:
         font_colour = 250, 240, 230
-    font = pygame.font.Font(None, 30)
-    size = font.size(msg)
-    ren = font.render(msg, 1, font_colour)
+
+    text_wall = TextWall()
+    text_wall.parse_text(msg)
     screen.fill(wincolor)
-    screen.blit(ren, (30 + size[0], 40 + size[1]))
+    text_wall.draw()
     pygame.display.update()
     time.sleep(0.5)
 
