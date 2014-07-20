@@ -30,9 +30,9 @@ STARTPIN = 3
 HEADPHONEMAGNETPIN = 4
 USE_HEADPHONE_SENSOR = True
 QUIT_WITH_KEYBOARD = True
-FULLSCREEN = True
-DEBUG = False
-MOVIE_FILE = 'take3d.mpg'
+FULLSCREEN = False
+DEBUG = True
+MOVIE_FILE = 'take3n.mp4'
 # short clip! MOVIE_FILE = 'testc.mov'
 SCREENSAVER_MESSAGE = 'Put on the headphones to start'
 BUTTON_MESSAGE = "Listen to the instructions, & press 'start' when ready"
@@ -89,7 +89,7 @@ def play_main_movie():
     global omxplayer
     if DEBUG:
         logging.info('play main movie..')
-    omxplayer = pexpect.spawn('/usr/bin/omxplayer -s %s' % MOVIE_FILE)
+    omxplayer = pexpect.spawn('/usr/bin/omxplayer -i -g -b -s %s' % MOVIE_FILE)
     time.sleep(4)
 
 
