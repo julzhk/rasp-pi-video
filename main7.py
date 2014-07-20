@@ -6,6 +6,7 @@ from pygame.locals import QUIT, KEYDOWN, MOUSEBUTTONDOWN
 import threading
 from threading import Timer
 import logging
+from tbo import TBOPlayer
 from pygame import Surface
 from text_block import TextWall, TextLine
 
@@ -73,6 +74,7 @@ def activate_glove():
 def quit_glove():
     # turn on LED & turn off both Relays
     led_off(GLOVETESTPIN)
+    print 'relay0/1 off'
     pfd.relays[0].turn_off()
     pfd.relays[1].turn_off()
 
@@ -89,8 +91,10 @@ def play_main_movie():
     global omxplayer
     if DEBUG:
         logging.info('play main movie..')
-    omxplayer = pexpect.spawn('/usr/bin/omxplayer -i -g -b -s %s' % MOVIE_FILE)
-    time.sleep(4)
+    omxplayer = TBOPlayer()
+    omxplayer.start_omx(track=MOVIE_FILE)
+    # pexpect.spawn('/usr/bin/omxplayer -i -g -b -s %s' % MOVIE_FILE)
+    time.sleep(3)
 
 
 def omxplayercounter():
@@ -104,13 +108,14 @@ def omxplayercounter():
 
 
 def cleanup_main_movie_player():
-    time.sleep(2)
+    print 'clean up main movie called'
     omx_pids = pexpect.spawn('pgrep omxplayer')
-    time.sleep(2)
+    time.sleep(1)
     pslist = omx_pids.read()
+    print str(pslist)
     for pid in pslist.split():
-        pidkill = 'sudo kill -9 %s' % pid
-        omx_pids = pexpect.spawn('sudo kill -9 %s' % pid)
+        killcmd = pexpect.spawn('kill -9 %s' % pid)
+        print killcmd.read()
 
 
 def debug_gpio():
