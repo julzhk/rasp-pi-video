@@ -16,9 +16,9 @@ except ImportError:
 
 from threaded_timer import TimerControl
 # how many seconds after the start of the movie should the glove start?
-GLOVE_COMMENCE_TIME = 2
+GLOVE_COMMENCE_TIME = 10
 # how many seconds after the start of the movie should the glove stop?
-GLOVE_QUIT_TIME = 10
+GLOVE_QUIT_TIME = 30
 
 HIDE_MOUSE = True
 RESETPIN = 0
@@ -28,13 +28,12 @@ STARTPIN = 3
 HEADPHONEMAGNETPIN = 4
 USE_HEADPHONE_SENSOR = True
 QUIT_WITH_KEYBOARD = True
-FULLSCREEN = False
-FPS = 30
-DEBUG = True
+FULLSCREEN = True
+DEBUG = False
 # MOVIE_FILE='take3d.mpg'
 MOVIE_FILE = 'testc.mov'
-SCREENSAVER_MESSAGE = 'Wear Headphones'
-BUTTON_MESSAGE = 'Press start'
+SCREENSAVER_MESSAGE = 'Put on the headphones to start'
+BUTTON_MESSAGE = "Listen to the instructions, & press 'start' when ready"
 #  how many omx video threads are running at the moment?
 #  will be 2 or 0
 _OMXPLAYER_COUNT = None
@@ -168,6 +167,8 @@ def screensaver():
         quit_button_check()
         if DEBUG:
             logging.debug('screensaver phase')
+        if pfd.input_pins[GLOVETESTPIN].value:
+            glovetest()
         if USE_HEADPHONE_SENSOR:
             if not headphones_on_stand():
                 print 'headphones lifted'
@@ -182,9 +183,11 @@ def screensaver():
 
 def replace_headphones():
     print 'waiting for headphones to be reset'
-    write_text(msg='Return headphones')
+    write_text(msg='Please return headphones to the stand')
     while True:
         quit_button_check()
+        if pfd.input_pins[GLOVETESTPIN].value:
+            glovetest()
         if DEBUG:
             logging.debug('waiting for headphones to be reset phase')
         if USE_HEADPHONE_SENSOR:
@@ -199,10 +202,11 @@ def replace_headphones():
 
 
 def glove_handler():
-    glove_start = Timer(GLOVE_COMMENCE_TIME, activate_glove)
-    glove_start.start()  # after NN seconds, glove trembles
-    glove_stop = Timer(GLOVE_QUIT_TIME, quit_glove)
-    glove_stop.start()
+    glove_start_thread = Timer(GLOVE_COMMENCE_TIME, activate_glove)
+    glove_start_thread.start()  # after NN seconds, glove trembles
+    glove_stop_thread = Timer(GLOVE_QUIT_TIME, quit_glove)
+    glove_stop_thread.start()
+    return glove_start_thread, glove_stop_thread
 
 
 def quit_button_check():
@@ -228,8 +232,7 @@ def start_mainmovie():
                 play_main_movie()
                 start_pause = False
     write_text(msg='')
-    # glove_handler()
-    omxplayercounter()
+    glovestartthread, glovestopthread = glove_handler()
     omxplayer_started = False
     while True:
         try:
@@ -260,7 +263,8 @@ def start_mainmovie():
                 # todo should exit and restart?
         except PhaseEndException:
             cleanup_main_movie_player()
-            stop_omx_player_watcher_thread()
+            glovestartthread.cancel()
+            glovestopthread.cancel()
             quit_glove()
             return
         except Exception as err:
@@ -287,7 +291,7 @@ def quit_pygame_display():
 
 if __name__ == "__main__":
     start_py_game_display()
-    # omxplayercounter()
+    omxplayercounter()
     try:
         while True:
             screensaver()
