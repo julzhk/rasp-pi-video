@@ -37,26 +37,23 @@ SCREENSAVER_MESSAGE = 'Wear Headphones'
 BUTTON_MESSAGE = 'Press start'
 #  how many omx video threads are running at the moment?
 #  will be 2 or 0
-videocount = None
+_OMXPLAYER_COUNT = None
+_videocountthread_running = True
 
 
 class QuitException(Exception):
     pass
 
-
 class PhaseEndException(Exception):
     pass
-
 
 def led_off(pin):
     # Wrappers for turn on/off LED by number
     pfd.leds[pin].turn_off()
 
-
 def turn_off_all_outputs():
     [pfd.leds[i].turn_off() for i in range(0, 4)]
     quit_glove()
-
 
 def led_on(pin):
     # Wrappers for turn on/off LED by number
@@ -75,8 +72,6 @@ def activate_glove():
 def quit_glove():
     # turn on LED & turn off both Relays
     led_off(GLOVETESTPIN)
-    glove_start.cancel()
-    glove_stop.cancel()
     pfd.relays[0].turn_off()
     pfd.relays[1].turn_off()
 
@@ -94,22 +89,21 @@ def play_main_movie():
     if DEBUG:
         logging.info('play main movie..')
     omxplayer = pexpect.spawn('/usr/bin/omxplayer -s %s' % MOVIE_FILE)
-    time.sleep(3)
+    time.sleep(4)
 
 
 def omxplayercounter():
-    global videocount
-    global videocountthread
-    videocountthread = threading.Timer(3, omxplayercounter).start()
-    # print '.'
+    global _OMXPLAYER_COUNT, _videocountthread_running
+    videocountthread = threading.Timer(3, omxplayercounter)
+    if _videocountthread_running:
+        videocountthread.start()
     omx_pids = pexpect.spawn('pgrep omxplayer')
     pslist = omx_pids.read().split()
-    videocount = len(pslist)
+    _OMXPLAYER_COUNT = len(pslist)
 
 
-def reset_main_movie():
-    led_on(RESETPIN)
-    time.sleep(3)
+def cleanup_main_movie_player():
+    time.sleep(2)
     omx_pids = pexpect.spawn('pgrep omxplayer')
     time.sleep(2)
     pslist = omx_pids.read()
@@ -205,7 +199,6 @@ def replace_headphones():
 
 
 def glove_handler():
-    global glove_start, glove_stop
     glove_start = Timer(GLOVE_COMMENCE_TIME, activate_glove)
     glove_start.start()  # after NN seconds, glove trembles
     glove_stop = Timer(GLOVE_QUIT_TIME, quit_glove)
@@ -219,6 +212,11 @@ def quit_button_check():
         raise QuitException()
 
 
+def stop_omx_player_watcher_thread():
+    global _videocountthread_running
+    _videocountthread_running = False
+
+
 def start_mainmovie():
     if not USE_HEADPHONE_SENSOR:
         play_main_movie()
@@ -226,24 +224,30 @@ def start_mainmovie():
         write_text(msg=BUTTON_MESSAGE)
         start_pause = True
         while start_pause:
-            print start_button_pressed()
             if start_button_pressed():
                 play_main_movie()
                 start_pause = False
-    glove_handler()
     write_text(msg='')
+    # glove_handler()
+    omxplayercounter()
+    omxplayer_started = False
     while True:
         try:
             if DEBUG:
                 logging.debug('---play---')
-                logging.debug('videos: %s' % videocount)
+                logging.debug('videos: %s' % _OMXPLAYER_COUNT)
             if DEBUG:
                 debug()
-            if videocount < 2:
+            print _OMXPLAYER_COUNT
+            if _OMXPLAYER_COUNT >= 1:
+                # it's got to start before the 'has ended' condition can apply
+                omxplayer_started = True
+            if omxplayer_started and _OMXPLAYER_COUNT < 2:
                 print 'video finished!'
                 # so move to next phase
                 raise PhaseEndException()
             if pfd.input_pins[RESETPIN].value:
+                led_on(RESETPIN)
                 # so move to next phase
                 raise PhaseEndException()
             if USE_HEADPHONE_SENSOR and headphones_on_stand():
@@ -255,10 +259,9 @@ def start_mainmovie():
                 pass
                 # todo should exit and restart?
         except PhaseEndException:
-            global videocountthread
-            videocountthread.cancel()
+            cleanup_main_movie_player()
+            stop_omx_player_watcher_thread()
             quit_glove()
-
             return
         except Exception as err:
             print err
@@ -284,7 +287,7 @@ def quit_pygame_display():
 
 if __name__ == "__main__":
     start_py_game_display()
-    omxplayercounter()
+    # omxplayercounter()
     try:
         while True:
             screensaver()
@@ -293,6 +296,7 @@ if __name__ == "__main__":
     except QuitException:
         print 'bye!'
         quit_pygame_display()
-        reset_main_movie()
+        cleanup_main_movie_player()
+        stop_omx_player_watcher_thread()
         turn_off_all_outputs()
         sys.exit()
