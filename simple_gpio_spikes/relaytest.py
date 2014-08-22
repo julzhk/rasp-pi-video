@@ -3,8 +3,6 @@ import sys
 import pygame
 import pexpect
 from pygame.locals import QUIT, KEYDOWN, MOUSEBUTTONDOWN
-import logging_data
-import logging_decorator
 import random
 import threading
 from threading import Timer
