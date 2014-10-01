@@ -809,9 +809,12 @@ class Options:
         """reads options from options file to interface"""
         config=ConfigParser.ConfigParser()
         config.read(filename)
-
-        if config.get('config', 'audio', 0) == 'auto':
-            self.omx_audio_option = ""
+        # todo clean up this hack to get audio in headphones
+        #if  config.get('config','audio',0)=='auto':
+        #     self.omx_audio_option=""
+        #else:
+        #    self.omx_audio_option = "-o "+config.get('config','audio',0)
+            
         self.mode = config.get('config','mode',0)
         self.initial_track_dir =config.get('config','tracks',0)
         self.initial_playlist_dir =config.get('config','playlists',0)    
