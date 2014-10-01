@@ -9,6 +9,7 @@ import logging
 from tbo import TBOPlayer
 from pygame import Surface
 from text_block import TextWall, TextLine
+from threaded_timer import TimerControl
 
 try:
     import pifacedigitalio
@@ -22,21 +23,18 @@ GLOVE_COMMENCE_TIME = 10
 # how many seconds after the start of the movie should the glove stop?
 GLOVE_QUIT_TIME = 30
 
-from threaded_timer import TimerControl
-
-RESETPIN = 0
-GLOVETESTPIN = 1
-OFFPIN = 2
-STARTPIN = 3
-HEADPHONEMAGNETPIN = 4
-USE_HEADPHONE_SENSOR = True
-QUIT_WITH_KEYBOARD = True
-FULLSCREEN = False
+RESETPIN = -1 # NOT ACCESSABLE
+GLOVETESTPIN = 0
+OFFPIN = 1
+STARTPIN = 2
+HEADPHONEPIN = 3
+FULLSCREEN = True
 DEBUG = True
-MOVIE_FILE = 'take3n.mp4'
+MOVIE_FILE = 'transports.mp4'
 # short clip! MOVIE_FILE = 'testc.mov'
 SCREENSAVER_MESSAGE = 'Put on the headphones to start'
 BUTTON_MESSAGE = "Listen to the instructions, & press 'start' when ready"
+RETURN_HEADPHONES_TO_STAND_MESSAGE = 'Please return headphones to the stand'
 #  how many omx video threads are running at the moment?
 #  will be 2 or 0
 _OMXPLAYER_COUNT = None
@@ -96,7 +94,6 @@ def play_main_movie():
         logging.info('play main movie..')
     omxplayer = TBOPlayer()
     omxplayer.start_omx(track=MOVIE_FILE)
-    # pexpect.spawn('/usr/bin/omxplayer -i -g -b -s %s' % MOVIE_FILE)
     time.sleep(3)
 
 
@@ -130,15 +127,8 @@ def debug_gpio():
         )
 
 
-def check_keyboard_quit():
-    #todo no implemented
-    if QUIT_WITH_KEYBOARD:
-        if pygame.event.wait().type in (QUIT, KEYDOWN, MOUSEBUTTONDOWN):
-            raise QuitException
-
-
 def headphones_on_stand():
-    headphone_status = pfd.input_pins[HEADPHONEMAGNETPIN].value
+    headphone_status = pfd.input_pins[HEADPHONEPIN].value
     if DEBUG:
         logging.debug('headphone is on stand status: %s' % headphone_status)
     return headphone_status
@@ -168,7 +158,6 @@ def screensaver():
     """
     print 'screensaver start'
     print 'wait for headphones to be lifted'
-    global USE_HEADPHONE_SENSOR
     write_text(msg=SCREENSAVER_MESSAGE)
     while True:
         quit_button_check()
@@ -176,11 +165,10 @@ def screensaver():
             logging.debug('screensaver phase')
         if pfd.input_pins[GLOVETESTPIN].value:
             glovetest()
-        if USE_HEADPHONE_SENSOR:
-            if not headphones_on_stand():
-                print 'headphones lifted'
-                time.sleep(0.5)
-                return
+        if not headphones_on_stand():
+            print 'headphones lifted'
+            time.sleep(0.5)
+            return
         else:
             if start_button_pressed():
                 print 'start button'
@@ -190,18 +178,17 @@ def screensaver():
 
 def replace_headphones():
     print 'waiting for headphones to be reset'
-    write_text(msg='Please return headphones to the stand')
+    write_text(msg=RETURN_HEADPHONES_TO_STAND_MESSAGE)
     while True:
         quit_button_check()
         if pfd.input_pins[GLOVETESTPIN].value:
             glovetest()
         if DEBUG:
             logging.debug('waiting for headphones to be reset phase')
-        if USE_HEADPHONE_SENSOR:
-            if start_button_pressed() or headphones_on_stand():
-                print 'headphones reset'
-                time.sleep(2)
-                return
+        if start_button_pressed() or headphones_on_stand():
+            print 'headphones reset'
+            time.sleep(2)
+            return
         else:
             time.sleep(2)
             print 'auto reset & start again'
@@ -237,15 +224,14 @@ def stop_omx_player_watcher_thread():
 
 
 def start_mainmovie():
-    if not USE_HEADPHONE_SENSOR:
-        play_main_movie()
-    else:
-        write_text(msg=BUTTON_MESSAGE)
-        start_pause = True
-        while start_pause:
-            if start_button_pressed():
-                play_main_movie()
-                start_pause = False
+
+    write_text(msg=BUTTON_MESSAGE)
+    start_pause = True
+    while start_pause:
+        quit_button_check()
+        if start_button_pressed():
+            play_main_movie()
+            start_pause = False
     write_text(msg='')
     glovestartthread, glovestopthread = glove_handler()
     omxplayer_started = False
@@ -266,7 +252,7 @@ def start_mainmovie():
                 led_on(RESETPIN)
                 # so move to next phase
                 raise PhaseEndException()
-            if USE_HEADPHONE_SENSOR and headphones_on_stand():
+            if headphones_on_stand():
                 raise PhaseEndException()
             quit_button_check()
             if pfd.input_pins[GLOVETESTPIN].value:
