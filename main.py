@@ -23,8 +23,8 @@ GLOVE_COMMENCE_TIME = 10
 # how many seconds after the start of the movie should the glove stop?
 GLOVE_QUIT_TIME = 30
 
-RESETPIN = -1 # NOT ACCESSABLE
-GLOVETESTPIN = 0
+RESETPIN = 0
+GLOVETESTPIN = -1 # NOT ACCESSABLE
 OFFPIN = 1
 STARTPIN = 2
 HEADPHONEPIN = 3
@@ -42,6 +42,12 @@ _videocountthread_running = True
 
 
 class QuitException(Exception):
+    pass
+
+class OffException(Exception):
+    """
+    Turn off the device
+    """
     pass
 
 
@@ -208,10 +214,15 @@ def glove_handler():
 
 
 def quit_button_check():
-    if pfd.input_pins[OFFPIN].value:
+    reset_pin = pfd.input_pins[RESETPIN].value
+    off_pin = pfd.input_pins[OFFPIN].value
+    if reset_pin or off_pin:
         print 'ok, quit button'
         quit_glove()
-        raise QuitException()
+        if reset_pin:
+            raise QuitException()
+        if off_pin:
+            raise OffException()
 
 
 def stop_omx_player_watcher_thread():
@@ -288,6 +299,14 @@ def quit_pygame_display():
     pygame.quit()
 
 
+def quit_cleanup():
+    print 'bye!'
+    quit_pygame_display()
+    cleanup_main_movie_player()
+    stop_omx_player_watcher_thread()
+    turn_off_all_outputs()
+
+
 if __name__ == "__main__":
     start_py_game_display()
     omxplayercounter()
@@ -297,9 +316,9 @@ if __name__ == "__main__":
             start_mainmovie()
             replace_headphones()
     except QuitException:
-        print 'bye!'
-        quit_pygame_display()
-        cleanup_main_movie_player()
-        stop_omx_player_watcher_thread()
-        turn_off_all_outputs()
+        quit_cleanup()
         sys.exit()
+    except OffException:
+        quit_cleanup()
+        import os
+        os.system("poweroff")
