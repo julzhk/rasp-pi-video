@@ -19,12 +19,12 @@ except ImportError:
     pfd_installed = False
 
 # how many seconds after the start of the movie should the glove start?
-GLOVE_COMMENCE_TIME = 10
+GLOVE_COMMENCE_TIME = 150
 # how many seconds after the start of the movie should the glove stop?
-GLOVE_QUIT_TIME = 30
+GLOVE_QUIT_TIME = 10*60
 
 RESETPIN = 0
-GLOVETESTPIN = -1 # NOT ACCESSABLE
+GLOVETESTPIN = -1 # NOT ACCESSIBLE
 OFFPIN = 1
 STARTPIN = 2
 HEADPHONEPIN = 3
@@ -299,8 +299,8 @@ def quit_pygame_display():
     pygame.quit()
 
 
-def quit_cleanup():
-    print 'bye!'
+def cleanup():
+    print 'done!'
     quit_pygame_display()
     cleanup_main_movie_player()
     stop_omx_player_watcher_thread()
@@ -315,10 +315,13 @@ if __name__ == "__main__":
             screensaver()
             start_mainmovie()
             replace_headphones()
+            cleanup()
     except QuitException:
-        quit_cleanup()
+        cleanup()
+        print 'quit!'
         sys.exit()
     except OffException:
-        quit_cleanup()
+        cleanup()
+        print 'bye!'
         import os
         os.system("poweroff")
