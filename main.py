@@ -20,10 +20,10 @@ except ImportError:
 
 # how many seconds after the start of the movie should the glove start?
 # GLOVE_COMMENCE_TIME = 150
-GLOVE_COMMENCE_TIME = 15
+GLOVE_COMMENCE_TIME = 1
 # how many seconds after the start of the movie should the glove stop?
 # GLOVE_QUIT_TIME = 565
-GLOVE_QUIT_TIME = 56
+GLOVE_QUIT_TIME = 3
 # off timecode: 9:25
 
 RESETPIN = 0
@@ -33,7 +33,7 @@ STARTPIN = 2
 HEADPHONEPIN = 3
 FULLSCREEN = True
 DEBUG = True
-MOVIE_FILE = 'testb.mp4'
+MOVIE_FILE = 'test.mp4'
 # short clip! MOVIE_FILE = 'testc.mov'
 SCREENSAVER_MESSAGE = 'Put on the headphones to start'
 BUTTON_MESSAGE = "Listen to the instructions, & press 'start' when ready"
@@ -189,21 +189,20 @@ def replace_headphones():
     print 'waiting for headphones to be reset'
     write_text(msg=RETURN_HEADPHONES_TO_STAND_MESSAGE)
     wait = 0
-    while True:
+    while wait > 15 or (not start_button_pressed()) or not(headphones_on_stand()):
         quit_button_check()
         if pfd.input_pins[GLOVETESTPIN].value:
             glovetest()
         if DEBUG:
             logging.debug('waiting for headphones to be reset phase')
-        while wait > 15 or not (start_button_pressed() or headphones_on_stand()):
-            print 'waiting for headphones reset'
-            time.sleep(2)
-            wait += 1
-            return
-        else:
-            time.sleep(2)
-            print 'headphones reset phase done, start again'
-            return
+        print 'waiting for headphones reset'
+        time.sleep(2)
+        wait += 1
+        return
+    else:
+        time.sleep(2)
+        print 'headphones reset phase done, start again'
+        return
 
 
 def glove_handler():
