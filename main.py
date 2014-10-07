@@ -189,16 +189,18 @@ def replace_headphones():
     print 'waiting for headphones to be reset'
     write_text(msg=RETURN_HEADPHONES_TO_STAND_MESSAGE)
     wait = 0
-    while wait > 15 or (not start_button_pressed()) or not(headphones_on_stand()):
+    while wait < 15 and (start_button_pressed()==False) and (headphones_on_stand()==False):
         quit_button_check()
+        print 'start button ', start_button_pressed()
+        print 'headphones on stand ',headphones_on_stand() 
         if pfd.input_pins[GLOVETESTPIN].value:
             glovetest()
         if DEBUG:
             logging.debug('waiting for headphones to be reset phase')
         print 'waiting for headphones reset'
+        print wait
         time.sleep(2)
         wait += 1
-        return
     else:
         time.sleep(2)
         print 'headphones reset phase done, start again'
