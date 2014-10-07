@@ -21,7 +21,8 @@ except ImportError:
 # how many seconds after the start of the movie should the glove start?
 GLOVE_COMMENCE_TIME = 150
 # how many seconds after the start of the movie should the glove stop?
-GLOVE_QUIT_TIME = 10*60
+GLOVE_QUIT_TIME = 565
+# off timecode: 9:25
 
 RESETPIN = 0
 GLOVETESTPIN = -1 # NOT ACCESSIBLE
@@ -185,15 +186,17 @@ def screensaver():
 def replace_headphones():
     print 'waiting for headphones to be reset'
     write_text(msg=RETURN_HEADPHONES_TO_STAND_MESSAGE)
+    wait = 0
     while True:
         quit_button_check()
         if pfd.input_pins[GLOVETESTPIN].value:
             glovetest()
         if DEBUG:
             logging.debug('waiting for headphones to be reset phase')
-        if start_button_pressed() or headphones_on_stand():
+        while wait < 15 or not (start_button_pressed() or headphones_on_stand()):
             print 'headphones reset'
             time.sleep(2)
+            wait += 1
             return
         else:
             time.sleep(2)
@@ -315,7 +318,7 @@ if __name__ == "__main__":
             screensaver()
             start_mainmovie()
             replace_headphones()
-            cleanup()
+            cleanup_main_movie_player()
     except QuitException:
         cleanup()
         print 'quit!'
