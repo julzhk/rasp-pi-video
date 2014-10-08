@@ -19,11 +19,9 @@ except ImportError:
     pfd_installed = False
 
 # how many seconds after the start of the movie should the glove start?
-# GLOVE_COMMENCE_TIME = 150
-GLOVE_COMMENCE_TIME = 1
+GLOVE_COMMENCE_TIME = 150
 # how many seconds after the start of the movie should the glove stop?
-# GLOVE_QUIT_TIME = 565
-GLOVE_QUIT_TIME = 3
+GLOVE_QUIT_TIME = 565
 # off timecode: 9:25
 
 RESETPIN = 0
@@ -33,7 +31,7 @@ STARTPIN = 2
 HEADPHONEPIN = 3
 FULLSCREEN = True
 DEBUG = True
-MOVIE_FILE = 'test.mp4'
+MOVIE_FILE = 'transports.mp4'
 # short clip! MOVIE_FILE = 'testc.mov'
 SCREENSAVER_MESSAGE = 'Put on the headphones to start'
 BUTTON_MESSAGE = "Listen to the instructions, & press 'start' when ready"
@@ -153,7 +151,7 @@ def write_text(msg='Demo message', wincolor=None, font_colour=None):
     if font_colour is None:
         font_colour = 250, 240, 230
 
-    text_wall = TextWall()
+    text_wall = TextWall(size=100)
     text_wall.parse_text(msg)
     screen.fill(wincolor)
     text_wall.draw()
