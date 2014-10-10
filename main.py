@@ -34,6 +34,7 @@ HEADPHONEPIN = 3
 FULLSCREEN = True
 DEBUG = True
 MOVIE_FILE = 'test.mp4'
+INSTRUCTIONS_FILE = 'instructions.mp3'
 # short clip! MOVIE_FILE = 'testc.mov'
 SCREENSAVER_MESSAGE = 'Put on the headphones to start'
 BUTTON_MESSAGE = "Listen to the instructions, & press 'start' when ready"
@@ -96,17 +97,26 @@ def glovetest():
     quit_glove()
 
 
-def play_main_movie():
+def play_movie(track):
     led_on(STARTPIN)
     global omxplayer
     if DEBUG:
-        logging.info('play main movie..')
+        logging.info('play %s track' % track)
     omxplayer = TBOPlayer()
-    omxplayer.start_omx(track=MOVIE_FILE)
+    omxplayer.start_omx(track=track)
     time.sleep(3)
+
+def play_main_movie():
+    return play_movie(track=MOVIE_FILE)
 
 
 def omxplayercounter():
+    """
+    How many omx players are running at the moment? Set into the
+    GLOBAL VARIABLE: _OMXPLAYER_COUNT
+    Found by doing a ps command & counting how many jobs return
+    Sets itself up as a DAEMON, running every three seconds.
+    """
     global _OMXPLAYER_COUNT, _videocountthread_running
     videocountthread = threading.Timer(3, omxplayercounter)
     if _videocountthread_running:
@@ -116,7 +126,7 @@ def omxplayercounter():
     _OMXPLAYER_COUNT = len(pslist)
 
 
-def cleanup_main_movie_player():
+def cleanup_omx_player():
     print 'clean up main movie called'
     omx_pids = pexpect.spawn('pgrep omxplayer')
     time.sleep(1)
@@ -184,6 +194,9 @@ def screensaver():
                 time.sleep(0.5)
                 return
 
+def play_instructions():
+    return play_movie(track=INSTRUCTIONS_FILE)
+
 
 def replace_headphones():
     print 'waiting for headphones to be reset'
@@ -247,6 +260,8 @@ def start_mainmovie():
     while start_pause:
         quit_button_check()
         if start_button_pressed():
+            cleanup_omx_player()
+            time.sleep(2)
             play_main_movie()
             start_pause = False
     write_text(msg='')
@@ -278,7 +293,7 @@ def start_mainmovie():
                 pass
                 # todo should exit / restart?
         except PhaseEndException:
-            cleanup_main_movie_player()
+            cleanup_omx_player()
             glovestartthread.cancel()
             glovestopthread.cancel()
             quit_glove()
@@ -308,7 +323,7 @@ def quit_pygame_display():
 def cleanup():
     print 'done!'
     quit_pygame_display()
-    cleanup_main_movie_player()
+    cleanup_omx_player()
     stop_omx_player_watcher_thread()
     turn_off_all_outputs()
 
@@ -319,9 +334,10 @@ if __name__ == "__main__":
     try:
         while True:
             screensaver()
+            play_instructions()
             start_mainmovie()
             replace_headphones()
-            cleanup_main_movie_player()
+            cleanup_omx_player()
     except QuitException:
         cleanup()
         print 'quit!'
