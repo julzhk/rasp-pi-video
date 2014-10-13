@@ -10,6 +10,7 @@ from tbo import TBOPlayer
 from pygame import Surface
 from text_block import TextWall, TextLine
 from threaded_timer import TimerControl
+import textwrap
 
 try:
     import pifacedigitalio
@@ -22,6 +23,7 @@ except ImportError:
 GLOVE_COMMENCE_TIME = 150
 # how many seconds after the start of the movie should the glove stop?
 GLOVE_QUIT_TIME = 565
+
 # off timecode: 9:25
 
 RESETPIN = 0
@@ -31,11 +33,12 @@ STARTPIN = 2
 HEADPHONEPIN = 3
 FULLSCREEN = True
 DEBUG = True
+LINE_CHAR_LEN = 30
 INSTRUCTIONS_FILE = 'instructions.mp3'
 MOVIE_FILE = 'transports.mp4'
 # short clip! MOVIE_FILE = 'testc.mov'
 SCREENSAVER_MESSAGE = 'Put on the headphones to start'
-BUTTON_MESSAGE = "Listen to the instructions, & press 'start' when ready"
+BUTTON_MESSAGE = "Listen to the instructions and press the red 'start' button  when ready"
 RETURN_HEADPHONES_TO_STAND_MESSAGE = 'Please return headphones to the stand'
 #  how many omx video threads are running at the moment?
 #  will be 2 or 0
@@ -160,7 +163,7 @@ def write_text(msg='Demo message', wincolor=None, font_colour=None):
         wincolor = 0, 0, 0
     if font_colour is None:
         font_colour = 250, 240, 230
-
+    msg = textwrap.fill(msg,LINE_CHAR_LEN)
     text_wall = TextWall(size=100)
     text_wall.parse_text(msg)
     screen.fill(wincolor)

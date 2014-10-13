@@ -69,7 +69,7 @@ class TextWall(object):
     def __init__(self, font=None, size=16):
         self.font = font
         self.font_size = size        
-        self.offset = Rect(20,20,1,1) # offset of whole wall
+        self.offset = Rect(60,60,10,10) # offset of whole wall
 
         self.screen = pygame.display.get_surface()
         self.dirty = True
