@@ -11,7 +11,14 @@ from pygame import Surface
 from text_block import TextWall, TextLine
 from threaded_timer import TimerControl
 import textwrap
-
+import logging
+logging.basicConfig(
+    filename='parkinson.log',
+    level=logging.DEBUG)
+import time
+now = time.strftime("%c")
+logging.info("Current time %s"  % now )
+Run = 0
 try:
     import pifacedigitalio
     pfd = pifacedigitalio.PiFaceDigital()
@@ -57,6 +64,7 @@ class OffException(Exception):
 
 
 class PhaseEndException(Exception):
+    logging.info('PhaseEnd Exception')
     pass
 
 
@@ -125,6 +133,7 @@ def omxplayercounter():
     omx_pids = pexpect.spawn('pgrep omxplayer')
     pslist = omx_pids.read().split()
     _OMXPLAYER_COUNT = len(pslist)
+    logging.info('%s omx players' % _OMXPLAYER_COUNT )
 
 
 def cleanup_omx_player():
@@ -140,11 +149,12 @@ def cleanup_omx_player():
 
 def debug_gpio():
     if pfd_installed:
-        logging.debug(
-            ','.join(['%s:%s' %
-                      (i, pfd.input_pins[i].value) for i in xrange(0, 8)]
-            )
-        )
+        #logging.debug(
+        #    ','.join(['%s:%s' %
+        #              (i, pfd.input_pins[i].value) for i in xrange(0, 8)]
+        #    )
+        #)
+        pass
 
 
 def headphones_on_stand():
@@ -200,13 +210,13 @@ def play_instructions():
 
 
 def replace_headphones():
-    print 'waiting for headphones to be reset'
+    logging.info('waiting for headphones to be reset')
     write_text(msg=RETURN_HEADPHONES_TO_STAND_MESSAGE)
     wait = 0
     while wait < 15 and (start_button_pressed()==False) and (headphones_on_stand()==False):
         quit_button_check()
         print 'start button ', start_button_pressed()
-        print 'headphones on stand ',headphones_on_stand() 
+        logging.info('headphones on stand ',headphones_on_stand() ) 
         if pfd.input_pins[GLOVETESTPIN].value:
             glovetest()
         if DEBUG:
@@ -217,7 +227,7 @@ def replace_headphones():
         wait += 1
     else:
         time.sleep(2)
-        print 'headphones reset phase done, start again'
+        logging.info('headphones reset phase done, start again')
         return
 
 
@@ -252,6 +262,7 @@ def stop_omx_player_watcher_thread():
     """
     global _videocountthread_running
     _videocountthread_running = False
+    logging.info('stop watcher thread')
 
 
 def start_mainmovie():
@@ -278,7 +289,7 @@ def start_mainmovie():
                 # it's got to start before the 'has ended' condition can apply
                 omxplayer_started = True
             if omxplayer_started and _OMXPLAYER_COUNT < 2:
-                print 'video finished!'
+                logging.info('video finished!')
                 # so move to next phase
                 raise PhaseEndException()
             if pfd.input_pins[RESETPIN].value:
@@ -300,6 +311,7 @@ def start_mainmovie():
             quit_glove()
             return
         except Exception as err:
+            logging.info('Err: %s' % err)
             print err
             raise
 
@@ -334,10 +346,15 @@ if __name__ == "__main__":
     omxplayercounter()
     try:
         while True:
+            logging.info('1:start screensaver')
             screensaver()
+            logging.info('2:play instruction')
             play_instructions()
+            logging.info('3:start main movie')
             start_mainmovie()
+            logging.info('4:replace headphones')
             replace_headphones()
+            logging.info('5:cleanup')
             cleanup_omx_player()
     except QuitException:
         cleanup()
