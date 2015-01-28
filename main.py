@@ -113,7 +113,7 @@ def play_movie(track):
         logging.info('play %s track' % track)
     omxplayer = TBOPlayer()
     omxplayer.start_omx(track=track)
-    time.sleep(3)
+    time.sleep(1.5)
 
 def play_main_movie():
     return play_movie(track=MOVIE_FILE)
@@ -141,7 +141,7 @@ def cleanup_omx_player():
     omx_pids = pexpect.spawn('pgrep omxplayer')
     time.sleep(1)
     pslist = omx_pids.read()
-    print str(pslist)
+    logging.info( str(pslist))
     for pid in pslist.split():
         killcmd = pexpect.spawn('kill -9 %s' % pid)
         print killcmd.read()
@@ -223,10 +223,10 @@ def replace_headphones():
             logging.debug('waiting for headphones to be reset phase')
         logging.info( 'waiting for headphones reset')
         logging.info(wait)
-        time.sleep(2)
+        time.sleep(1)
         wait += 1
     else:
-        time.sleep(2)
+        time.sleep(1)
         logging.info('headphones reset phase done, start again')
         return
 
@@ -273,7 +273,7 @@ def start_mainmovie():
         quit_button_check()
         if start_button_pressed():
             cleanup_omx_player()
-            time.sleep(2)
+            time.sleep(1)
             play_main_movie()
             start_pause = False
     write_text(msg='')
