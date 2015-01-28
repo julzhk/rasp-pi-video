@@ -137,7 +137,7 @@ def omxplayercounter():
 
 
 def cleanup_omx_player():
-    print 'clean up main movie called'
+    logging.info('clean up main movie called')
     omx_pids = pexpect.spawn('pgrep omxplayer')
     time.sleep(1)
     pslist = omx_pids.read()
@@ -159,8 +159,8 @@ def debug_gpio():
 
 def headphones_on_stand():
     headphone_status = pfd.input_pins[HEADPHONEPIN].value
-    if DEBUG:
-        logging.debug('headphone is on stand status: %s' % headphone_status)
+    # if DEBUG:
+    #     logging.debug('headphone is on stand status: %s' % headphone_status)
     return headphone_status
 
 
@@ -186,8 +186,8 @@ def screensaver():
     """
         Waiting for a user. Waiting for the headphones to be lifted
     """
-    print 'screensaver start'
-    print 'wait for headphones to be lifted'
+    logging.info( 'screensaver start')
+    logging.info( 'wait for headphones to be lifted')
     write_text(msg=SCREENSAVER_MESSAGE)
     while True:
         quit_button_check()
@@ -196,12 +196,12 @@ def screensaver():
         if pfd.input_pins[GLOVETESTPIN].value:
             glovetest()
         if not headphones_on_stand():
-            print 'headphones lifted'
+            logging.info('headphones lifted')
             time.sleep(0.5)
             return
         else:
             if start_button_pressed():
-                print 'start button'
+                logging.info('start button')
                 time.sleep(0.5)
                 return
 
@@ -221,8 +221,8 @@ def replace_headphones():
             glovetest()
         if DEBUG:
             logging.debug('waiting for headphones to be reset phase')
-        print 'waiting for headphones reset'
-        print wait
+        logging.info( 'waiting for headphones reset')
+        logging.info(wait)
         time.sleep(2)
         wait += 1
     else:
@@ -247,7 +247,7 @@ def quit_button_check():
     reset_pin = pfd.input_pins[RESETPIN].value
     off_pin = pfd.input_pins[OFFPIN].value
     if reset_pin or off_pin:
-        print 'ok, quit button'
+        logging.info( 'ok, quit button')
         quit_glove()
         if reset_pin:
             raise QuitException()
@@ -334,7 +334,7 @@ def quit_pygame_display():
 
 
 def cleanup():
-    print 'done!'
+    logging.info( 'done!')
     quit_pygame_display()
     cleanup_omx_player()
     stop_omx_player_watcher_thread()
@@ -358,10 +358,10 @@ if __name__ == "__main__":
             cleanup_omx_player()
     except QuitException:
         cleanup()
-        print 'quit!'
+        logging.info( 'quit!')
         sys.exit()
     except OffException:
         cleanup()
-        print 'bye!'
+        logging.info( 'bye!')
         import os
         os.system("poweroff")
