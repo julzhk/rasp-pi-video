@@ -20,3 +20,13 @@ I use the fantastic Pycharm IDE on my Mac, and it took a while to get an efficie
 - Once you have a ssh into the Raspberry Pi, set Pycharm to use the raspberry Pi's remote debugging: http://www.jetbrains.com/pycharm/webhelp/remote-debugging.html . This lets you run the python in the IDE, but use the Raspberry Pi's Python. 
 - Register the ssh keys on the Raspberry Pi with your github account. Then if you make any changes on the Raspberry Pi directly, you can easily push them back into the github project.
 
+
+Development Notes
+=======
+
+- debug process: login and run from another machine: ssh -Y pi@192.168.0.8
+- then run: 
+   cd rasp-pi-video/ 
+   python main.py
+   
+- In another ssh shell: tail -f /rasp-pi-video/parkinsons.log

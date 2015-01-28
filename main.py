@@ -1,4 +1,5 @@
 import time
+import os
 import sys
 import pygame
 import pexpect
@@ -66,6 +67,13 @@ class OffException(Exception):
 class PhaseEndException(Exception):
     logging.info('PhaseEnd Exception')
     pass
+
+def delete_log(fn='parkinson.log'):
+    try:
+        os.remove(fn)
+        logging.info('deleted log')
+    except OSError:
+        logging.info('FAILED to delete log')
 
 
 def led_off(pin):
@@ -216,7 +224,8 @@ def replace_headphones():
     while wait < 15 and (start_button_pressed()==False) and (headphones_on_stand()==False):
         quit_button_check()
         print 'start button ', start_button_pressed()
-        logging.info('headphones on stand ',headphones_on_stand() ) 
+        logging.info('headphones on stand status:' )
+        logging.info(headphones_on_stand() )
         if pfd.input_pins[GLOVETESTPIN].value:
             glovetest()
         if DEBUG:
@@ -342,6 +351,7 @@ def cleanup():
 
 
 if __name__ == "__main__":
+    delete_log()
     start_py_game_display()
     omxplayercounter()
     try:
@@ -363,5 +373,5 @@ if __name__ == "__main__":
     except OffException:
         cleanup()
         logging.info( 'bye!')
-        import os
+
         os.system("poweroff")
