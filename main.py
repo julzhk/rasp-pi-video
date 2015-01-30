@@ -313,16 +313,16 @@ def start_mainmovie():
             if start_button_pressed():
                 pass
                 # todo should exit / restart?
-        except PhaseEndException:
+        except Exception as err:
+            logging.info('End video playing: %s' % err)
             cleanup_omx_player()
-            glovestartthread.cancel()
-            glovestopthread.cancel()
+            logging.info('Cancel glove threads')
+            glovestartthread.stop()
+            glovestartthread._stop.set()
+            glovestopthread.stop()
+            glovestopthread._stop.set()
             quit_glove()
             return
-        except Exception as err:
-            logging.info('Err: %s' % err)
-            print err
-            raise
 
 
 def start_py_game_display():
