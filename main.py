@@ -85,28 +85,16 @@ def turn_off_all_outputs():
     [piface_IO.leds[i].turn_off() for i in range(0, 4)]
     quit_glove()
 
-
-def led_on(pin):
-    # Wrappers for turn on/off LED by number
-    piface_IO.leds[pin].turn_on()
-    # auto off LED in a few seconds
-    return TimerControl(funktion=led_off, args=[pin]).start()
-
-
 def activate_glove():
     # turn on LED & turn on both Relays
     piface_IO.relays[0].turn_on()
     piface_IO.relays[1].turn_on()
-    return led_on(GLOVETESTPIN)
-
 
 def quit_glove():
     # turn on LED & turn off both Relays
-    led_off(GLOVETESTPIN)
     print 'glove relays off'
     piface_IO.relays[0].turn_off()
     piface_IO.relays[1].turn_off()
-
 
 def glovetest():
     # called by button on pin GLOVETESTPIN
@@ -122,7 +110,6 @@ def play_movie(track):
     omxplayer = TBOPlayer()
     omxplayer.start_omx(track=track)
     time.sleep(1.5)
-    return led_on(STARTPIN)
 
 def play_main_movie():
     return play_movie(track=MOVIE_FILE)
@@ -241,7 +228,7 @@ def replace_headphones():
         return
 
 
-def glove_handler():
+def  glove_handler():
     """
     starts and stops the glove at certain time stamps; using threads.
     """
@@ -304,7 +291,6 @@ def start_mainmovie():
                 # so move to next phase
                 raise PhaseEndException()
             if piface_IO.input_pins[RESETPIN].value:
-                THREADS.append(led_on(RESETPIN))
                 # so move to next phase
                 raise PhaseEndException()
             if headphones_on_stand():
@@ -343,7 +329,6 @@ def quit_pygame_display():
 def cancel_all_threads():
     for thread in THREADS:
         thread.cancel()
-        thread.join()
 
 
 def cleanup():
