@@ -188,7 +188,7 @@ def screensaver():
     while True:
         quit_button_check()
         if DEBUG:
-            logging.debug('screensaver phase')
+            # logging.debug('screensaver phase')
         if piface_IO.input_pins[GLOVETESTPIN].value:
             glovetest()
         if not headphones_on_stand():
@@ -214,18 +214,11 @@ def replace_headphones():
         print 'start button ', start_button_pressed()
         logging.info('headphones on stand status:' )
         logging.info(headphones_on_stand() )
-        if piface_IO.input_pins[GLOVETESTPIN].value:
-            glovetest()
-        if DEBUG:
-            logging.debug('waiting for headphones to be reset phase')
-        logging.info( 'waiting for headphones reset')
+        # logging.info( 'waiting for headphones reset')
         logging.info(wait)
         time.sleep(1)
         wait += 1
-    else:
-        time.sleep(1)
-        logging.info('headphones reset phase done, start again')
-        return
+    logging.info('headphones reset phase done, start again')
 
 
 def  glove_handler():
