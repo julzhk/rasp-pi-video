@@ -24,11 +24,11 @@ except ImportError:
 
 
 import logging
-logging.basicConfig(filename='debuglog.log',level=logging.DEBUG)
-logging.info("Current time %s" % time.strftime("%c"))
+#  log to file?
+# logging.basicConfig(filename='debuglog.log',level=logging.DEBUG)
+# logging.info("Current time %s" % time.strftime("%c"))
 
 RESETPIN = 0
-GLOVETESTPIN = -1 # NOT ACCESSIBLE
 OFFPIN = 1
 STARTPIN = 2
 HEADPHONEPIN = 3
@@ -95,13 +95,6 @@ def quit_glove():
     print 'glove relays off'
     piface_IO.relays[0].turn_off()
     piface_IO.relays[1].turn_off()
-
-def glovetest():
-    # called by button on pin GLOVETESTPIN
-    activate_glove()
-    time.sleep(2)
-    quit_glove()
-
 
 def play_movie(track):
     global omxplayer
@@ -187,10 +180,6 @@ def screensaver():
     write_text(msg=SCREENSAVER_MESSAGE)
     while True:
         quit_button_check()
-        if DEBUG:
-            # logging.debug('screensaver phase')
-        if piface_IO.input_pins[GLOVETESTPIN].value:
-            glovetest()
         if not headphones_on_stand():
             logging.info('headphones lifted')
             time.sleep(0.25)
@@ -289,8 +278,6 @@ def start_mainmovie():
             if headphones_on_stand():
                 raise PhaseEndException()
             quit_button_check()
-            if piface_IO.input_pins[GLOVETESTPIN].value:
-                glovetest()
             if start_button_pressed():
                 pass
                 # todo should exit / restart?
