@@ -1,38 +1,31 @@
-import time
+import logging
 import os
 import sys
-import pygame
-import pexpect
-from pygame.locals import QUIT, KEYDOWN, MOUSEBUTTONDOWN
-import threading
-from threading import Timer
-import logging
-from tbo import TBOPlayer
-from pygame import Surface
-from text_block import TextWall, TextLine
-from threaded_timer import TimerControl
-import textwrap
-import logging
-logging.basicConfig(
-    filename='parkinson.log',
-    level=logging.DEBUG)
 import time
-now = time.strftime("%c")
-logging.info("Current time %s"  % now )
-Run = 0
+import pexpect
+import threading
+import textwrap
+from threading import Timer
+from threaded_timer import TimerControl
 try:
+    import pygame
     import pifacedigitalio
-    pfd = pifacedigitalio.PiFaceDigital()
-    pfd_installed = True
+    from pygame.locals import QUIT, KEYDOWN, MOUSEBUTTONDOWN
+    from pygame import Surface
+    from tbo import TBOPlayer
+    from text_block import TextWall, TextLine
+    piface_IO = pifacedigitalio.PiFaceDigital()
 except ImportError:
-    pfd_installed = False
+    print 'running development environment'
+    from mocks import pygame
+    from mocks import piface_IO
+    from mocks import TextWall, TextLine
+    from mocks import TBOPlayer
 
-# how many seconds after the start of the movie should the glove start?
-GLOVE_COMMENCE_TIME = 150
-# how many seconds after the start of the movie should the glove stop?
-GLOVE_QUIT_TIME = 565
 
-# off timecode: 9:25
+import logging
+logging.basicConfig(filename='debuglog.log',level=logging.DEBUG)
+logging.info("Current time %s" % time.strftime("%c"))
 
 RESETPIN = 0
 GLOVETESTPIN = -1 # NOT ACCESSIBLE
@@ -40,19 +33,27 @@ OFFPIN = 1
 STARTPIN = 2
 HEADPHONEPIN = 3
 FULLSCREEN = True
-DEBUG = True
-LINE_CHAR_LEN = 30
-INSTRUCTIONS_FILE = 'instructions.mp3'
-MOVIE_FILE = 'transports.mp4'
-# short clip! MOVIE_FILE = 'testc.mov'
 SCREENSAVER_MESSAGE = 'Put on the headphones to start'
 BUTTON_MESSAGE = "Listen to the instructions and press the red 'start' button  when ready"
 RETURN_HEADPHONES_TO_STAND_MESSAGE = 'Please return headphones to the stand'
+
+# how many seconds after the start of the movie should the glove start?
+GLOVE_COMMENCE_TIME = 150
+# how many seconds after the start of the movie should the glove stop?
+GLOVE_QUIT_TIME = 565
+# off timecode: 9:25
+
+DEBUG = True
+LINE_CHAR_LEN = 30
+INSTRUCTIONS_FILE = 'instructions.mp3'
+# short clip! MOVIE_FILE = 'testc.mov'
+MOVIE_FILE = 'transports.mp4'
+GPIO_DEBUG = False
+THREADS = []
 #  how many omx video threads are running at the moment?
 #  will be 2 or 0
 _OMXPLAYER_COUNT = None
 _videocountthread_running = True
-
 
 class QuitException(Exception):
     pass
@@ -68,7 +69,7 @@ class PhaseEndException(Exception):
     logging.info('PhaseEnd Exception')
     pass
 
-def delete_log(fn='parkinson.log'):
+def delete_log(fn='debug.log'):
     try:
         os.remove(fn)
         logging.info('deleted log')
@@ -78,33 +79,33 @@ def delete_log(fn='parkinson.log'):
 
 def led_off(pin):
     # Wrappers for turn on/off LED by number
-    pfd.leds[pin].turn_off()
+    piface_IO.leds[pin].turn_off()
 
 def turn_off_all_outputs():
-    [pfd.leds[i].turn_off() for i in range(0, 4)]
+    [piface_IO.leds[i].turn_off() for i in range(0, 4)]
     quit_glove()
 
 
 def led_on(pin):
     # Wrappers for turn on/off LED by number
-    pfd.leds[pin].turn_on()
+    piface_IO.leds[pin].turn_on()
     # auto off LED in a few seconds
-    TimerControl(funktion=led_off, args=[pin]).start()
+    return TimerControl(funktion=led_off, args=[pin]).start()
 
 
 def activate_glove():
     # turn on LED & turn on both Relays
-    led_on(GLOVETESTPIN)
-    pfd.relays[0].turn_on()
-    pfd.relays[1].turn_on()
+    piface_IO.relays[0].turn_on()
+    piface_IO.relays[1].turn_on()
+    return led_on(GLOVETESTPIN)
 
 
 def quit_glove():
     # turn on LED & turn off both Relays
     led_off(GLOVETESTPIN)
-    print 'relay0/1 off'
-    pfd.relays[0].turn_off()
-    pfd.relays[1].turn_off()
+    print 'glove relays off'
+    piface_IO.relays[0].turn_off()
+    piface_IO.relays[1].turn_off()
 
 
 def glovetest():
@@ -115,13 +116,13 @@ def glovetest():
 
 
 def play_movie(track):
-    led_on(STARTPIN)
     global omxplayer
     if DEBUG:
         logging.info('play %s track' % track)
     omxplayer = TBOPlayer()
     omxplayer.start_omx(track=track)
     time.sleep(1.5)
+    return led_on(STARTPIN)
 
 def play_main_movie():
     return play_movie(track=MOVIE_FILE)
@@ -142,12 +143,13 @@ def omxplayercounter():
     pslist = omx_pids.read().split()
     _OMXPLAYER_COUNT = len(pslist)
     logging.info('%s omx players' % _OMXPLAYER_COUNT )
+    return videocountthread
 
 
 def cleanup_omx_player():
     logging.info('clean up main movie called')
     omx_pids = pexpect.spawn('pgrep omxplayer')
-    time.sleep(1)
+    time.sleep(.25)
     pslist = omx_pids.read()
     logging.info( str(pslist))
     for pid in pslist.split():
@@ -156,24 +158,23 @@ def cleanup_omx_player():
 
 
 def debug_gpio():
-    if pfd_installed:
-        #logging.debug(
-        #    ','.join(['%s:%s' %
-        #              (i, pfd.input_pins[i].value) for i in xrange(0, 8)]
-        #    )
-        #)
-        pass
+    if GPIO_DEBUG:
+        logging.debug(
+           ','.join(['%s:%s' %
+                     (i, piface_IO.input_pins[i].value) for i in xrange(0, 8)]
+           )
+        )
 
 
 def headphones_on_stand():
-    headphone_status = pfd.input_pins[HEADPHONEPIN].value
+    headphone_status = piface_IO.input_pins[HEADPHONEPIN].value
     # if DEBUG:
     #     logging.debug('headphone is on stand status: %s' % headphone_status)
     return headphone_status
 
 
 def start_button_pressed():
-    return pfd.input_pins[STARTPIN].value
+    return piface_IO.input_pins[STARTPIN].value
 
 
 def write_text(msg='Demo message', wincolor=None, font_colour=None):
@@ -201,16 +202,16 @@ def screensaver():
         quit_button_check()
         if DEBUG:
             logging.debug('screensaver phase')
-        if pfd.input_pins[GLOVETESTPIN].value:
+        if piface_IO.input_pins[GLOVETESTPIN].value:
             glovetest()
         if not headphones_on_stand():
             logging.info('headphones lifted')
-            time.sleep(0.5)
+            time.sleep(0.25)
             return
         else:
             if start_button_pressed():
                 logging.info('start button')
-                time.sleep(0.5)
+                time.sleep(0.25)
                 return
 
 def play_instructions():
@@ -226,7 +227,7 @@ def replace_headphones():
         print 'start button ', start_button_pressed()
         logging.info('headphones on stand status:' )
         logging.info(headphones_on_stand() )
-        if pfd.input_pins[GLOVETESTPIN].value:
+        if piface_IO.input_pins[GLOVETESTPIN].value:
             glovetest()
         if DEBUG:
             logging.debug('waiting for headphones to be reset phase')
@@ -243,7 +244,6 @@ def replace_headphones():
 def glove_handler():
     """
     starts and stops the glove at certain time stamps; using threads.
-
     """
     glove_start_thread = Timer(GLOVE_COMMENCE_TIME, activate_glove)
     glove_start_thread.start()  # after NN seconds, glove trembles
@@ -253,8 +253,8 @@ def glove_handler():
 
 
 def quit_button_check():
-    reset_pin = pfd.input_pins[RESETPIN].value
-    off_pin = pfd.input_pins[OFFPIN].value
+    reset_pin = piface_IO.input_pins[RESETPIN].value
+    off_pin = piface_IO.input_pins[OFFPIN].value
     if reset_pin or off_pin:
         logging.info( 'ok, quit button')
         quit_glove()
@@ -275,7 +275,7 @@ def stop_omx_player_watcher_thread():
 
 
 def start_mainmovie():
-
+    global THREADS
     write_text(msg=BUTTON_MESSAGE)
     start_pause = True
     while start_pause:
@@ -287,6 +287,8 @@ def start_mainmovie():
             start_pause = False
     write_text(msg='')
     glovestartthread, glovestopthread = glove_handler()
+    THREADS.append(glovestartthread)
+    THREADS.append(glovestopthread)
     omxplayer_started = False
     while True:
         try:
@@ -301,28 +303,25 @@ def start_mainmovie():
                 logging.info('video finished!')
                 # so move to next phase
                 raise PhaseEndException()
-            if pfd.input_pins[RESETPIN].value:
-                led_on(RESETPIN)
+            if piface_IO.input_pins[RESETPIN].value:
+                THREADS.append(led_on(RESETPIN))
                 # so move to next phase
                 raise PhaseEndException()
             if headphones_on_stand():
                 raise PhaseEndException()
             quit_button_check()
-            if pfd.input_pins[GLOVETESTPIN].value:
+            if piface_IO.input_pins[GLOVETESTPIN].value:
                 glovetest()
             if start_button_pressed():
                 pass
                 # todo should exit / restart?
-        except Exception as err:
-            logging.info('End video playing: %s' % err)
-            cleanup_omx_player()
-            logging.info('Cancel glove threads')
-            glovestartthread.stop()
-            glovestartthread._stop.set()
-            glovestopthread.stop()
-            glovestopthread._stop.set()
-            quit_glove()
+
+        except (QuitException, OffException):
+            raise
+        except PhaseEndException:
             return
+        except Exception as err:
+            logging.ERROR('Unknown error: End video playing: %s' % err)
 
 
 def start_py_game_display():
@@ -337,23 +336,37 @@ def start_py_game_display():
     else:
         screen = pygame.display.set_mode((400, 240), pygame.RESIZABLE)
 
-
 def quit_pygame_display():
     pygame.quit()
 
 
+def cancel_all_threads():
+    for thread in THREADS:
+        thread.cancel()
+        thread.join()
+
+
 def cleanup():
+    cleanup_omx_player()
+    logging.info('Cancel glove threads')
+    cancel_all_threads()
+    quit_glove()
+
+def exit_cleanup():
     logging.info( 'done!')
+    cleanup()
+    turn_off_all_outputs()
     quit_pygame_display()
+    cancel_all_threads()
     cleanup_omx_player()
     stop_omx_player_watcher_thread()
-    turn_off_all_outputs()
+
 
 
 if __name__ == "__main__":
-    delete_log()
+    # delete_log()
     start_py_game_display()
-    omxplayercounter()
+    THREADS.append(omxplayercounter())
     try:
         while True:
             logging.info('1:start screensaver')
@@ -362,16 +375,25 @@ if __name__ == "__main__":
             play_instructions()
             logging.info('3:start main movie')
             start_mainmovie()
+            cleanup()
             logging.info('4:replace headphones')
             replace_headphones()
             logging.info('5:cleanup')
-            cleanup_omx_player()
+            cleanup()
     except QuitException:
         cleanup()
         logging.info( 'quit!')
         sys.exit()
     except OffException:
-        cleanup()
+        exit_cleanup()
         logging.info( 'bye!')
-
         os.system("poweroff")
+    except Exception as err:
+        logging.info('Unexpected error')
+        logging.info(type(err))
+        logging.info(err.args)
+        logging.info(err)
+        exit_cleanup()
+        logging.info('END')
+
+
