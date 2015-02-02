@@ -38,7 +38,8 @@ BUTTON_MESSAGE = "Listen to the instructions and press the red 'start' button  w
 RETURN_HEADPHONES_TO_STAND_MESSAGE = 'Please return headphones to the stand'
 
 # how many seconds after the start of the movie should the glove start?
-GLOVE_COMMENCE_TIME = 150
+# GLOVE_COMMENCE_TIME = 150
+GLOVE_COMMENCE_TIME = 10
 # how many seconds after the start of the movie should the glove stop?
 GLOVE_QUIT_TIME = 565
 # off timecode: 9:25
@@ -49,7 +50,6 @@ INSTRUCTIONS_FILE = 'instructions.mp3'
 # short clip! MOVIE_FILE = 'testc.mov'
 MOVIE_FILE = 'transports.mp4'
 GPIO_DEBUG = False
-THREADS = []
 #  how many omx video threads are running at the moment?
 #  will be 2 or 0
 _OMXPLAYER_COUNT = None
@@ -64,17 +64,9 @@ class OffException(Exception):
     """
     pass
 
-
 class PhaseEndException(Exception):
     logging.info('PhaseEnd Exception')
     pass
-
-def delete_log(fn='debug.log'):
-    try:
-        os.remove(fn)
-        logging.info('deleted log')
-    except OSError:
-        logging.info('FAILED to delete log')
 
 
 def led_off(pin):
@@ -92,7 +84,7 @@ def activate_glove():
 
 def quit_glove():
     # turn on LED & turn off both Relays
-    print 'glove relays off'
+    logging.info('glove relays off')
     piface_IO.relays[0].turn_off()
     piface_IO.relays[1].turn_off()
 
@@ -210,17 +202,6 @@ def replace_headphones():
     logging.info('headphones reset phase done, start again')
 
 
-def  glove_handler():
-    """
-    starts and stops the glove at certain time stamps; using threads.
-    """
-    glove_start_thread = Timer(GLOVE_COMMENCE_TIME, activate_glove)
-    glove_start_thread.start()  # after NN seconds, glove trembles
-    glove_stop_thread = Timer(GLOVE_QUIT_TIME, quit_glove)
-    glove_stop_thread.start()
-    return glove_start_thread, glove_stop_thread
-
-
 def quit_button_check():
     reset_pin = piface_IO.input_pins[RESETPIN].value
     off_pin = piface_IO.input_pins[OFFPIN].value
@@ -244,30 +225,34 @@ def stop_omx_player_watcher_thread():
 
 
 def start_mainmovie():
-    global THREADS
     write_text(msg=BUTTON_MESSAGE)
     start_pause = True
     while start_pause:
         quit_button_check()
+        quit_glove()
         if start_button_pressed():
             cleanup_omx_player()
             time.sleep(1)
             play_main_movie()
             start_pause = False
     write_text(msg='')
-    glovestartthread, glovestopthread = glove_handler()
-    THREADS.append(glovestartthread)
-    THREADS.append(glovestopthread)
     omxplayer_started = False
+    starttime = time.time()
     while True:
         try:
             if DEBUG:
-                logging.debug('---play---')
                 logging.debug('videos: %s' % _OMXPLAYER_COUNT)
                 debug_gpio()
             if _OMXPLAYER_COUNT >= 1:
                 # it's got to start before the 'has ended' condition can apply
                 omxplayer_started = True
+            timecode = time.time() - starttime
+            if timecode> GLOVE_COMMENCE_TIME and timecode < GLOVE_QUIT_TIME:
+                logging.info('259:activate glove')
+                activate_glove()
+            else:
+                logging.info('262:off glove')
+                quit_glove()
             if omxplayer_started and _OMXPLAYER_COUNT < 2:
                 logging.info('video finished!')
                 # so move to next phase
@@ -281,13 +266,12 @@ def start_mainmovie():
             if start_button_pressed():
                 pass
                 # todo should exit / restart?
-
         except (QuitException, OffException):
             raise
         except PhaseEndException:
             return
         except Exception as err:
-            logging.ERROR('Unknown error: End video playing: %s' % err)
+            logging.error('Unknown error: End video playing: %s' % err)
 
 
 def start_py_game_display():
@@ -306,15 +290,9 @@ def quit_pygame_display():
     pygame.quit()
 
 
-def cancel_all_threads():
-    for thread in THREADS:
-        thread.cancel()
-
 
 def cleanup():
     cleanup_omx_player()
-    logging.info('Cancel glove threads')
-    cancel_all_threads()
     quit_glove()
 
 def exit_cleanup():
@@ -322,16 +300,13 @@ def exit_cleanup():
     cleanup()
     turn_off_all_outputs()
     quit_pygame_display()
-    cancel_all_threads()
     cleanup_omx_player()
     stop_omx_player_watcher_thread()
 
 
 
 if __name__ == "__main__":
-    # delete_log()
     start_py_game_display()
-    THREADS.append(omxplayercounter())
     try:
         while True:
             logging.info('1:start screensaver')
