@@ -33,13 +33,6 @@ SCREENSAVER_MESSAGE = 'Put on the headphones to start'
 BUTTON_MESSAGE = "Listen to the instructions and press the red 'start' button  when ready"
 RETURN_HEADPHONES_TO_STAND_MESSAGE = 'Please return headphones to the stand'
 
-# how many seconds after the start of the movie should the glove start?
-# GLOVE_COMMENCE_TIME = 150
-GLOVE_COMMENCE_TIME = 10
-# how many seconds after the start of the movie should the glove stop?
-GLOVE_QUIT_TIME = 565
-# off timecode: 9:25
-
 DEBUG = True
 LINE_CHAR_LEN = 30
 INSTRUCTIONS_FILE = 'instructions.mp3'
@@ -71,18 +64,7 @@ def led_off(pin):
 
 def turn_off_all_outputs():
     [piface_IO.leds[i].turn_off() for i in range(0, 4)]
-    quit_glove()
 
-def activate_glove():
-    # turn on LED & turn on both Relays
-    piface_IO.relays[0].turn_on()
-    piface_IO.relays[1].turn_on()
-
-def quit_glove():
-    # turn on LED & turn off both Relays
-    logging.info('glove relays off')
-    piface_IO.relays[0].turn_off()
-    piface_IO.relays[1].turn_off()
 
 def play_movie(track):
     global omxplayer
@@ -186,7 +168,7 @@ def replace_headphones():
     logging.info('waiting for headphones to be reset')
     write_text(msg=RETURN_HEADPHONES_TO_STAND_MESSAGE)
     wait = 0
-    while wait < 15 and (start_button_pressed()==False) and (headphones_on_stand()==False):
+    while wait < 10 and (start_button_pressed()==False) and (headphones_on_stand()==False):
         quit_button_check()
         print 'start button ', start_button_pressed()
         logging.info('headphones on stand status:' )
@@ -203,7 +185,6 @@ def quit_button_check():
     off_pin = piface_IO.input_pins[OFFPIN].value
     if reset_pin or off_pin:
         logging.info( 'ok, quit button')
-        quit_glove()
         if reset_pin:
             raise QuitException()
         if off_pin:
@@ -221,9 +202,9 @@ def stop_omx_player_watcher_thread():
 
 
 def start_mainmovie():
+    global THREADS
     write_text(msg=BUTTON_MESSAGE)
     start_pause = True
-    quit_glove()
     while start_pause:
         quit_button_check()
         if start_button_pressed():
@@ -233,24 +214,15 @@ def start_mainmovie():
             start_pause = False
     write_text(msg='')
     omxplayer_started = False
-    starttime = time.time()
-    quit_glove()
     while True:
         try:
             if DEBUG:
+                logging.debug('---play---')
                 logging.debug('videos: %s' % _OMXPLAYER_COUNT)
                 debug_gpio()
             if _OMXPLAYER_COUNT >= 1:
                 # it's got to start before the 'has ended' condition can apply
                 omxplayer_started = True
-            timecode = time.time() - starttime
-            if timecode> GLOVE_COMMENCE_TIME and timecode < GLOVE_QUIT_TIME and not (int(timecode) % 5):
-                # fire glove every n seconds between start and stop times
-                logging.info('259:activate glove')
-                activate_glove()
-            elif timecode > GLOVE_QUIT_TIME and not (int(timecode) % 25):
-                logging.info('262:off glove')
-                quit_glove()
             if omxplayer_started and _OMXPLAYER_COUNT < 2:
                 logging.info('video finished!')
                 # so move to next phase
@@ -264,6 +236,7 @@ def start_mainmovie():
             if start_button_pressed():
                 pass
                 # todo should exit / restart?
+
         except (QuitException, OffException):
             raise
         except PhaseEndException:
@@ -291,7 +264,6 @@ def quit_pygame_display():
 
 def cleanup():
     cleanup_omx_player()
-    quit_glove()
 
 def exit_cleanup():
     logging.info( 'done!')
@@ -302,9 +274,9 @@ def exit_cleanup():
     stop_omx_player_watcher_thread()
 
 
-
 if __name__ == "__main__":
     start_py_game_display()
+    omxplayercounter()
     try:
         while True:
             logging.info('1:start screensaver')
@@ -318,7 +290,7 @@ if __name__ == "__main__":
             replace_headphones()
             logging.info('5:cleanup')
             cleanup()
-    except QuitExc11eption:
+    except QuitException:
         cleanup()
         logging.info( 'quit!')
         sys.exit()
