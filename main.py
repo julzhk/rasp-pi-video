@@ -5,8 +5,6 @@ import time
 import pexpect
 import threading
 import textwrap
-from threading import Timer
-from threaded_timer import TimerControl
 try:
     import pygame
     import pifacedigitalio
@@ -25,8 +23,8 @@ except ImportError:
 
 import logging
 #  log to file?
-# logging.basicConfig(filename='debuglog.log',level=logging.DEBUG)
-# logging.info("Current time %s" % time.strftime("%c"))
+logging.basicConfig(filename='debuglog.log',level=logging.DEBUG)
+logging.info("Current time %s" % time.strftime("%c"))
 
 RESETPIN = 0
 OFFPIN = 1
@@ -320,7 +318,7 @@ if __name__ == "__main__":
             replace_headphones()
             logging.info('5:cleanup')
             cleanup()
-    except QuitException:
+    except QuitExc11eption:
         cleanup()
         logging.info( 'quit!')
         sys.exit()
