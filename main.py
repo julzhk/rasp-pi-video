@@ -20,8 +20,6 @@ except ImportError:
     from mocks import TextWall, TextLine
     from mocks import TBOPlayer
 
-
-import logging
 #  log to file?
 logging.basicConfig(filename='debuglog.log',level=logging.DEBUG)
 logging.info("Current time %s" % time.strftime("%c"))
@@ -225,9 +223,9 @@ def stop_omx_player_watcher_thread():
 def start_mainmovie():
     write_text(msg=BUTTON_MESSAGE)
     start_pause = True
+    quit_glove()
     while start_pause:
         quit_button_check()
-        quit_glove()
         if start_button_pressed():
             cleanup_omx_player()
             time.sleep(1)
@@ -236,6 +234,7 @@ def start_mainmovie():
     write_text(msg='')
     omxplayer_started = False
     starttime = time.time()
+    quit_glove()
     while True:
         try:
             if DEBUG:
@@ -245,10 +244,11 @@ def start_mainmovie():
                 # it's got to start before the 'has ended' condition can apply
                 omxplayer_started = True
             timecode = time.time() - starttime
-            if timecode> GLOVE_COMMENCE_TIME and timecode < GLOVE_QUIT_TIME:
+            if timecode> GLOVE_COMMENCE_TIME and timecode < GLOVE_QUIT_TIME and not (int(timecode) % 5):
+                # fire glove every n seconds between start and stop times
                 logging.info('259:activate glove')
                 activate_glove()
-            else:
+            elif timecode > GLOVE_QUIT_TIME and not (int(timecode) % 25):
                 logging.info('262:off glove')
                 quit_glove()
             if omxplayer_started and _OMXPLAYER_COUNT < 2:
